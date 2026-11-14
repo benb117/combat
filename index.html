@@ -554,7 +554,7 @@ const LIVE=CFG.url.indexOf("http")===0;
 const CNAME=["Red","Blue","Gold","Green","Purple","Orange","Teal","Pink"];
 const COLORS=["#ff6b6b","#4dc9ff","#ffc93c","#7be07b","#c58bff","#ff9f43","#5ff0d0","#ff7ac8"];
 const FINS=[["burn","INCINERATED",0],["melt","LIQUIDATED",0],["snakes","SNAKE PIT",0],["halve","SPLIT DECISION",1],["behead","HEADS ROLL",1],["stab","RUN THROUGH",1],["ko","LAVA BATH",0]];
-const ROUNDS=["Quarterfinals","Semifinals","Final"],ATIME=40000,MAXD=5;
+const ROUNDS=["Quarterfinals","Semifinals","Final"],ATIME=45000,MAXD=9;
 const app=document.getElementById("app"),stage=document.getElementById("stage");
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
@@ -563,32 +563,45 @@ const ss={get:k=>{try{return JSON.parse(sessionStorage.getItem(k))}catch(e){retu
 
 /* Prompts: each answer is [depth, display name, ...aliases]. Depth 1 = the obvious answer, 5 = the one few people remember. Depths are a judgment call; the host can adjust any score at reveal. */
 const PROMPTS=[
-{q:"Name one of the nine influence tactics.",a:[[1,"Rational persuasion","rational","logic","reason","persuasion"],[1,"Pressure","threats","demands"],[2,"Exchange","trade","favors"],[2,"Consultation","consult","consulting"],[3,"Inspirational appeals","inspirational","inspiration","inspire"],[3,"Coalition","coalitions","coalition building"],[4,"Ingratiation","flattery","ingratiating"],[4,"Personal appeals","personal","friendship"],[5,"Legitimating","legitimizing","legitimation","legitimate"]]},
-{q:"Name one of the five bases of power.",a:[[1,"Legitimate","legitimate authority","formal authority","authority"],[2,"Reward","rewards"],[2,"Coercive","coercion","punishment"],[3,"Expert","expertise"],[5,"Referent","reference","referant"]]},
-{q:"Name one of Cialdini's six principles of persuasion.",a:[[1,"Reciprocity","reciprocation","reciprocate"],[2,"Authority","expertise"],[2,"Liking","like","likability"],[3,"Scarcity","scarce"],[4,"Social proof","proof","consensus"],[5,"Consistency","commitment","commitment and consistency"]]},
-{q:"Name a motivation theory from this course.",a:[[1,"Maslow's hierarchy","maslow","hierarchy","maslows hierarchy"],[2,"Expectancy theory","expectancy","vroom"],[2,"Goal-setting theory","goal setting","goals","locke"],[2,"Equity theory","equity","adams"],[3,"Herzberg's two-factor theory","herzberg","two factor","hygiene","motivator hygiene"],[3,"McClelland's acquired needs","mcclelland","acquired","acquired needs"],[3,"Self-determination theory","self determination","sdt","deci and ryan"],[4,"Job characteristics model","job characteristics","jcm","hackman"],[4,"Theory X and Theory Y","x","y","x and y","x y","mcgregor"],[4,"Reinforcement theory","reinforcement","skinner"],[5,"ERG theory","erg","alderfer"]]},
-{q:"Name one of the Big Five personality traits.",a:[[1,"Extraversion","extroversion","extravert","extrovert"],[2,"Openness","openness experience","open"],[2,"Agreeableness","agreeable"],[3,"Conscientiousness","conscientious"],[5,"Emotional stability","neuroticism","stability","neurotic"]]},
-{q:"Name one of the five conflict-handling styles.",a:[[1,"Avoiding","avoid","avoidance"],[1,"Compromising","compromise"],[2,"Collaborating","integrating","collaborate","collaboration","integrate"],[3,"Competing","dominating","compete","dominate","competition"],[4,"Accommodating","obliging","accommodate","oblige","accomodating"]]},
-{q:"Name a decision-making bias.",a:[[1,"Confirmation bias","confirmation"],[2,"Overconfidence","overconfident"],[2,"Anchoring","anchor"],[3,"Hindsight bias","hindsight"],[3,"Availability bias","availability"],[3,"Framing","frame"],[4,"Escalation of commitment","escalation","sunk cost","sunk costs","commitment escalation"],[5,"Representativeness","representative","representativeness heuristic"]]},
-{q:"Name one of the five core job dimensions.",a:[[1,"Autonomy"],[1,"Feedback"],[2,"Skill variety","variety","skills"],[3,"Task significance","significance"],[5,"Task identity","identity"]]},
-{q:"Name a program NAI runs for its scholars or families.",a:[[1,"Saturday Academy","saturday","saturday school","saturday classes"],[2,"The Ambassadors","ambassadors","ambassador","nai ambassadors"],[2,"USC scholarship","scholarship","full tuition","tuition"],[3,"Weekday morning classes","morning classes","morning"],[4,"Family Development Institute","family development","fdi","family workshops","parent workshops"],[4,"Summer bridge","bridge","summer"],[5,"Junior Advisors","junior advisor","advisors"]]},
-{q:"Name one of McClelland's three needs or one of SDT's three needs.",a:[[1,"Achievement","nach"],[1,"Autonomy"],[2,"Power","npow"],[2,"Competence","competency"],[3,"Affiliation","naff"],[4,"Relatedness","related","relatedness"]]},
-{q:"Name a perception or rating error.",a:[[1,"Halo effect","halo"],[2,"Stereotyping","stereotype","stereotypes"],[2,"Fundamental attribution error","fae","fundamental attribution","attribution"],[3,"Self-serving bias","self serving"],[3,"Contrast effect","contrast"],[4,"Horn effect","horn"],[4,"Leniency","lenient"],[5,"Central tendency","central"],[5,"Severity","strictness"],[4,"Pygmalion effect","pygmalion","galatea"]]},
-{q:"Name a type of organizational commitment or organizational justice.",a:[[2,"Affective commitment","affective"],[3,"Continuance commitment","continuance"],[3,"Normative commitment","normative"],[2,"Distributive justice","distributive"],[2,"Procedural justice","procedural"],[5,"Interactional justice","interactional","interpersonal","informational"]]},
-{q:"Name a barrier to communication.",a:[[1,"Information overload","overload","info overload"],[1,"Emotions","emotion","mood"],[1,"Language","jargon","semantics"],[2,"Filtering","filter"],[2,"Physical barriers","physical","noise","distance"],[2,"Cross-cultural differences","culture","cultural","cross cultural"],[3,"Selective perception","selective"],[4,"Communication apprehension","apprehension","anxiety"],[5,"Past experience","experience"]]},
-{q:"From our study: name a source of power or an influence method NAI's leaders rely on.",a:[[1,"Referent power","referent"],[2,"Expert power","expert","expertise"],[3,"Consultation","consult"],[3,"Inspirational appeals","inspirational","inspiration"],[3,"Empowerment","ownership","empower"],[4,"Social proof","living proof","alumni stories","proof"],[2,"Personal power","personal"]]}
+{q:"List as many of the five bases of power as you can.",a:[[1,"Legitimate","legitimate authority","formal authority","authority","position"],[1,"Reward","rewards"],[1,"Coercive","coercion","punishment","punish"],[1,"Expert","expertise","knowledge"],[1,"Referent","reference","referant","charisma"]]},
+{q:"List as many of the nine influence tactics as you can.",a:[[1,"Rational persuasion","rational","logic","facts"],[1,"Inspirational appeal","inspirational","inspiration","inspire"],[1,"Consultation","consult","consulting"],[1,"Ingratiation","flattery","ingratiating","compliment"],[1,"Personal appeal","personal","friendship"],[1,"Exchange","trade","favors"],[1,"Coalition","coalitions"],[1,"Pressure","threats","demands"],[1,"Legitimating","legitimizing","legitimation","legitimate"]]},
+{q:"List as many of Cialdini's six principles of persuasion as you can.",a:[[1,"Liking","like","likability"],[1,"Reciprocity","reciprocation","reciprocate"],[1,"Social proof","proof","consensus"],[1,"Consistency","commitment"],[1,"Authority","expertise"],[1,"Scarcity","scarce"]]},
+{q:"List as many of the Big Five personality traits as you can.",a:[[1,"Openness","open"],[1,"Conscientiousness","conscientious"],[1,"Extraversion","extroversion","extravert","extrovert"],[1,"Agreeableness","agreeable"],[1,"Emotional stability","neuroticism","stability","neurotic"]]},
+{q:"List as many of the five conflict-handling styles as you can.",a:[[1,"Collaborating","integrating","collaborate","collaboration","integrate"],[1,"Competing","dominating","compete","dominate"],[1,"Accommodating","obliging","accommodate","oblige","accomodating"],[1,"Avoiding","avoid","avoidance"],[1,"Compromising","compromise"]]},
+{q:"List as many levels of Maslow's hierarchy as you can.",a:[[1,"Physiological","physical","food","basic"],[1,"Safety","security"],[1,"Love and belonging","belonging","love","social"],[1,"Esteem","respect"],[1,"Self-actualization","actualization","self actualisation"]]},
+{q:"List the three needs in self-determination theory.",a:[[1,"Competence","competency","competent"],[1,"Autonomy","autonomous"],[1,"Relatedness","related","connection","belonging"]]},
+{q:"List McClelland's three needs.",a:[[1,"Achievement","nach","achieve"],[1,"Affiliation","naff","affiliate"],[1,"Power","npow","influence"]]},
+{q:"List as many of the five core job dimensions as you can.",a:[[1,"Skill variety","variety","skills"],[1,"Task identity","identity"],[1,"Task significance","significance"],[1,"Autonomy"],[1,"Feedback"]]},
+{q:"List the three parts of expectancy theory.",a:[[1,"Expectancy","effort to performance"],[1,"Instrumentality","performance to reward"],[1,"Valence","value"]]},
+{q:"List the four parts of PsyCap (HERO).",a:[[1,"Hope"],[1,"Efficacy","self efficacy","confidence"],[1,"Resilience","resilient"],[1,"Optimism","optimistic"]]},
+{q:"List as many parts of PERMA as you can.",a:[[1,"Positive emotions","positive","emotions"],[1,"Engagement","engaged"],[1,"Relationships","relationship"],[1,"Meaning","purpose"],[1,"Achievement","accomplishment"]]},
+{q:"List as many decision-making biases as you can.",a:[[1,"Confirmation","confirmation bias"],[1,"Overconfidence","overconfident"],[1,"Availability"],[1,"Representativeness","representative"],[1,"Anchoring","anchor"],[1,"Hindsight"],[1,"Framing","frame"],[1,"Escalation of commitment","escalation","sunk cost","sunk costs"]]},
+{q:"List the three types of organizational justice.",a:[[1,"Distributive","outcome"],[1,"Procedural","process"],[1,"Interactional","interpersonal","informational","respect"]]},
+{q:"List the three types of organizational commitment.",a:[[1,"Affective","want"],[1,"Continuance","need"],[1,"Normative","ought"]]},
+{q:"List the four responses in EVLN.",a:[[1,"Exit","leave","quit"],[1,"Voice","speak up"],[1,"Loyalty","loyal"],[1,"Neglect"]]},
+{q:"List what the letters in SMART goals stand for.",a:[[1,"Specific"],[1,"Measurable","measure"],[1,"Attainable","achievable"],[1,"Results-oriented","results","relevant","realistic"],[1,"Time-bound","time","timely","deadline"]]},
+{q:"List as many barriers to communication as you can.",a:[[1,"Selective perception","selective"],[1,"Filtering","filter"],[1,"Information overload","overload"],[1,"Past experience","experience"],[1,"Emotions","emotion","mood"],[1,"Language","jargon"],[1,"Communication apprehension","apprehension","anxiety"],[1,"Physical barriers","physical","noise","distance"],[1,"Cross-cultural differences","culture","cultural","cross cultural"]]},
+{q:"List as many NAI programs for scholars or families as you can.",a:[[1,"Saturday Academy","saturday","saturday school"],[1,"The Ambassadors","ambassadors","ambassador"],[1,"USC scholarship","scholarship","full tuition","tuition"],[1,"Weekday morning classes","morning classes","morning"],[1,"Family Development Institute","family development","fdi","family workshops","parent workshops"],[1,"Summer bridge","bridge","summer"],[1,"Junior Advisors","junior advisor","advisors"]]},
+{q:"From our study: list the kinds of power and influence NAI's leaders rely on.",a:[[1,"Referent power","referent"],[1,"Expert power","expert","expertise"],[1,"Consultation","consult"],[1,"Inspirational appeals","inspirational","inspiration"],[1,"Empowerment","ownership","empower"],[1,"Social proof","living proof","alumni stories","proof"],[1,"Personal power","personal"]]}
 ];
 const STOP=/\b(the|a|an|of|to|for|and|power|bias|biases|effect|error|theory|need|needs|principle|style|tactic|tactics|appeal|appeals|model|commitment|justice|barriers|barrier)\b/g;
 const norm=s=>String(s).toLowerCase().replace(/&/g," and ").replace(/[^a-z0-9 ]/g," ").replace(STOP," ").replace(/\s+/g," ").trim();
 function lev(a,b){const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let p=Array.from({length:n+1},(_,i)=>i);
   for(let i=1;i<=m;i++){const c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[n]}
-function judge(pr,text){
-  const raw=String(text||"").trim(),n=norm(raw)||raw.toLowerCase().replace(/[^a-z0-9 ]/g,"").trim();if(!n)return{d:0,name:""};
+function judge1(pr,text){
+  const raw=String(text||"").trim(),n=norm(raw)||raw.toLowerCase().replace(/[^a-z0-9 ]/g,"").trim();if(!n)return null;
   let best=null,bs=9;
   pr.a.forEach(e=>{for(let i=1;i<e.length;i++){const al=norm(e[i])||e[i].toLowerCase();let sc=9;
     if(n===al)sc=0;else if(al.length>=5&&n.length>=4&&lev(n,al)<=(al.length>=8?2:1))sc=1;else if(al.length>=5&&n.indexOf(al)>-1)sc=2;
     if(sc<bs){bs=sc;best=e}}});
-  return best&&bs<9?{d:best[0],name:best[1]}:{d:0,name:""};
+  return best&&bs<9?best:null;
+}
+function judge(pr,text){
+  const raw=String(text||""),hit=[],add=e=>{if(e&&hit.indexOf(e)<0)hit.push(e)};
+  raw.split(/[,;\n\/+]|\band\b|&/i).map(x=>x.trim()).filter(Boolean).forEach(x=>add(judge1(pr,x)));
+  const whole=" "+norm(raw)+" ",plain=" "+raw.toLowerCase().replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim()+" ";
+  pr.a.forEach(e=>{for(let i=1;i<e.length;i++){const al=norm(e[i]),pl=e[i].toLowerCase().replace(/[^a-z0-9 ]/g," ").trim();if((al.length>=4&&whole.indexOf(" "+al+" ")>-1)||(pl.length>=4&&plain.indexOf(" "+pl+" ")>-1)){add(e);break}}});
+  return{d:Math.min(MAXD,hit.length),name:hit.map(e=>e[1]).join(", ")};
 }
 
 /* sound */
@@ -621,7 +634,7 @@ function hostMsg(m){
     pub()}
   else if(m.t==="hello")pub();
   else if(m.t==="ans"&&H.phase==="ask"&&H.cur&&m.askId===H.cur.askId){const ti=H.teams.findIndex(x=>x.id===m.id);
-    if(ti>-1&&activeTeams().indexOf(ti)>-1&&!H.cur.ans[m.id]){H.cur.ans[m.id]={text:String(m.text||"").slice(0,60),ms:Math.min(ATIME,Math.max(0,+m.ms||ATIME))};sfx.lock();saveH();pub();paintChips();
+    if(ti>-1&&activeTeams().indexOf(ti)>-1&&!H.cur.ans[m.id]){H.cur.ans[m.id]={text:String(m.text||"").slice(0,160),ms:Math.min(ATIME,Math.max(0,+m.ms||ATIME))};sfx.lock();saveH();pub();paintChips();
       if(activeTeams().every(i=>H.teams[i].bot||H.cur.ans[H.teams[i].id]))setTimeout(()=>{if(H.phase==="ask")endAsk()},600)}}
 }
 const NP=()=>H&&H.round===2?3:1;
@@ -674,7 +687,7 @@ function playerBoot(){
   clearInterval(pClock);pClock=setInterval(()=>{const c=document.getElementById("pclock");if(c&&P&&P.end)c.textContent=Math.max(0,Math.ceil((P.end-Date.now())/1000))},250);
   render();
 }
-function playerSubmit(text){if(!P||!P.st||P.st.phase!=="ask")return;P.pend={t:"ans",id:P.id,askId:P.st.askId,text:text.slice(0,60),ms:Math.max(0,ATIME-(P.end-Date.now())),ok:false};NET.send(P.pend);sfx.lock();render()}
+function playerSubmit(text){if(!P||!P.st||P.st.phase!=="ask")return;P.pend={t:"ans",id:P.id,askId:P.st.askId,text:text.slice(0,160),ms:Math.max(0,ATIME-(P.end-Date.now())),ok:false};NET.send(P.pend);sfx.lock();render()}
 
 /* ---------- views ---------- */
 function leave(){["ko304role","ko304host","ko304p"].forEach(ss.del);location.hash="";location.reload()}
@@ -748,7 +761,7 @@ const FIGHT=["Round one. Fight!","Round two. Fight!","Final round. Fight!"];
 function viewAsk(){
   stage.textContent=ROUNDS[H.round]+" · Prompt "+(H.pi+1)+" of "+NP();
   app.innerHTML=`<section class="askv"><p class="call">${NP()===1?"Sudden death. Fight!":FIGHT[H.pi]||"Fight!"}</p><div class="qmeta">${ROUNDS[H.round]} · Prompt ${H.pi+1} of ${NP()} · Room ${H.code}</div>
-  <h1 class="prompt">${esc(H.cur.prompt.q)}</h1><p class="lede">Type one answer on your phone. Rare answers go deeper. Obvious ones barely count.</p>
+  <h1 class="prompt">${esc(H.cur.prompt.q)}</h1><p class="lede">List as many as you can on your phone, separated by commas. Every correct one adds depth.</p>
   <div class="clock" id="clock">${Math.ceil(ATIME/1000)}</div><div class="teams" id="chips"></div>
   <div class="actions"><button class="ghost" id="skip" type="button">Reveal now</button></div></section>`;
   paintChips();document.getElementById("skip").onclick=endAsk;
@@ -819,13 +832,13 @@ function viewPlayer(){
   else if(s.champ)h=s.champ===P.id?`<h2 class="gold">You are the champion</h2>`:`<h2>${esc((s.teams.find(x=>x.id===s.champ)||{}).name||"")} wins the tournament</h2>`;
   else if(me.out)h=`<h2>Knocked out</h2><p class="note">Your run is over. Watch the big screen.</p>`;
   else if(s.phase==="lobby")h=`<h2>You're in, scholars</h2><p class="note">Waiting for the host to start. ${s.teams.length} of 8 teams joined.</p>`;
-  else if(s.phase==="bracket")h=`<p class="call">Scholars, are you ready?</p><h2>${ROUNDS[s.round]} up next</h2><p class="note">${me.inm?"Get ready. Rare answers go deeper.":"You have a bye this round."}</p>`;
+  else if(s.phase==="bracket")h=`<p class="call">Scholars, are you ready?</p><h2>${ROUNDS[s.round]} up next</h2><p class="note">${me.inm?"Get ready. The more you list, the deeper you go.":"You have a bye this round."}</p>`;
   else if(s.phase==="ask"){
     if(!me.inm)h=`<h2>Sit tight</h2><p class="note">You are not in this round.</p>`;
     else if(P.pend&&P.pend.askId===s.askId)h=`<h2>Locked in</h2><p class="typed">${esc(P.pend.text)}</p><p class="note">${P.pend.ok?"Eyes on the big screen.":"Sending..."}</p>`;
     else h=`<p class="call">${s.n===1?"Sudden death. Fight!":FIGHT[s.pi]||"Fight!"}</p><div class="qmeta">Prompt ${s.pi+1} of ${s.n}</div><h2>${esc(s.prompt)}</h2><div class="clock" id="pclock"></div>
-      <form id="af"><input id="ai" maxlength="60" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type one answer" aria-label="Your answer"><button class="cta" type="submit">LOCK IN</button></form>
-      <p class="note">One answer only. Rarer is deeper.</p>`}
+      <form id="af"><input id="ai" maxlength="160" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="e.g. first, second, third" aria-label="Your answer"><button class="cta" type="submit">LOCK IN</button></form>
+      <p class="note">List as many as you can, separated by commas. One submission.</p>`}
   else h=`<h2>Reveal time</h2><p class="note">Watch the big screen.</p>${me.last?`<p class="typed">${me.last.text?esc(me.last.text):"No answer"}</p><p class="note">Depth ${me.last.d} this prompt. Total ${me.total}.</p>`:""}`;
   app.innerHTML=`<section class="phone" style="--c:${me?me.color:"var(--gold)"}"><div class="me"><span class="chip" style="background:${me?me.color:"var(--dim)"}"></span><b>${esc(P.name)}</b></div>${h}</section>`;
   const af=document.getElementById("af");if(af){af.onsubmit=e=>{e.preventDefault();const v=document.getElementById("ai").value.trim();if(v)playerSubmit(v)};document.getElementById("ai").focus()}
