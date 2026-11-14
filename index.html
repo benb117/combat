@@ -553,7 +553,7 @@ const CFG={url:"https://eibeytehvdsyekbcmryr.supabase.co",key:"sb_publishable_xH
 const LIVE=CFG.url.indexOf("http")===0;
 const COLORS=["#ff6b6b","#4dc9ff","#ffc93c","#7be07b","#c58bff","#ff9f43","#5ff0d0","#ff7ac8"];
 const FINS=[["burn","INCINERATED",0],["melt","LIQUIDATED",0],["snakes","SNAKE PIT",0],["halve","SPLIT DECISION",1],["behead","HEADS ROLL",1],["stab","RUN THROUGH",1],["ko","LAVA BATH",0]];
-const ROUNDS=["Quarterfinals","Semifinals","Final"],NPROMPT=3,ATIME=40000,MAXD=5;
+const ROUNDS=["Quarterfinals","Semifinals","Final"],ATIME=40000,MAXD=5;
 const app=document.getElementById("app"),stage=document.getElementById("stage");
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
@@ -623,13 +623,14 @@ function hostMsg(m){
     if(ti>-1&&activeTeams().indexOf(ti)>-1&&!H.cur.ans[m.id]){H.cur.ans[m.id]={text:String(m.text||"").slice(0,60),ms:Math.min(ATIME,Math.max(0,+m.ms||ATIME))};sfx.lock();saveH();pub();paintChips();
       if(activeTeams().every(i=>H.teams[i].bot||H.cur.ans[H.teams[i].id]))setTimeout(()=>{if(H.phase==="ask")endAsk()},600)}}
 }
+const NP=()=>H&&H.round===2?3:1;
 const liveMatches=()=>H.rounds?H.rounds[H.round].map((m,i)=>({m,i})).filter(x=>x.m.ready&&!x.m.done&&x.m.a!=null&&x.m.b!=null):[];
 const activeTeams=()=>liveMatches().reduce((a,x)=>a.concat([x.m.a,x.m.b]),[]);
 function pub(){
   if(!H||!NET)return;const act=H.phase==="lobby"?[]:activeTeams(),out=new Set();
   if(H.rounds)H.rounds.forEach(rd=>rd.forEach(m=>{if(m.done&&m.a!=null&&m.b!=null)out.add(m.w===m.a?m.b:m.a)}));
   const fin=H.rounds&&H.rounds[2][0];
-  NET.send({t:"state",phase:H.phase,round:H.round,pi:H.pi,n:NPROMPT,prompt:H.phase==="ask"?H.cur.prompt.q:null,askId:H.cur?H.cur.askId:null,
+  NET.send({t:"state",phase:H.phase,round:H.round,pi:H.pi,n:NP(),prompt:H.phase==="ask"?H.cur.prompt.q:null,askId:H.cur?H.cur.askId:null,
     left:H.phase==="ask"?Math.max(0,H.cur.end-Date.now()):0,champ:fin&&fin.done&&fin.w!=null?H.teams[fin.w].id:null,
     teams:H.teams.map((tm,i)=>{let tot=0,last=null;liveMatches().forEach(x=>{const s=x.m.a===i?0:x.m.b===i?1:-1;if(s>-1){tot=x.m.s[s];last=x.m.last?x.m.last[s]:null}});
       return{id:tm.id,name:tm.name,color:tm.color,out:out.has(i),inm:act.indexOf(i)>-1,sub:!!(H.cur&&H.cur.ans[tm.id]),total:tot,last}})});
@@ -744,15 +745,15 @@ function paintChips(){const box=document.getElementById("chips");if(!box||!H||!H
   box.innerHTML=activeTeams().map(i=>{const t=H.teams[i],inn=!!H.cur.ans[t.id];return `<div class="trow ${inn?"in":""}"><span class="chip" style="background:${t.color}"></span><b>${esc(t.name)}</b><span class="st">${t.bot?"BOT":inn?"LOCKED IN":"typing"}</span></div>`}).join("")}
 const FIGHT=["Round one. Fight!","Round two. Fight!","Final round. Fight!"];
 function viewAsk(){
-  stage.textContent=ROUNDS[H.round]+" · Prompt "+(H.pi+1)+" of "+NPROMPT;
-  app.innerHTML=`<section class="askv"><p class="call">${FIGHT[H.pi]||"Fight!"}</p><div class="qmeta">${ROUNDS[H.round]} · Prompt ${H.pi+1} of ${NPROMPT} · Room ${H.code}</div>
+  stage.textContent=ROUNDS[H.round]+" · Prompt "+(H.pi+1)+" of "+NP();
+  app.innerHTML=`<section class="askv"><p class="call">${NP()===1?"Sudden death. Fight!":FIGHT[H.pi]||"Fight!"}</p><div class="qmeta">${ROUNDS[H.round]} · Prompt ${H.pi+1} of ${NP()} · Room ${H.code}</div>
   <h1 class="prompt">${esc(H.cur.prompt.q)}</h1><p class="lede">Type one answer on your phone. Rare answers go deeper. Obvious ones barely count.</p>
   <div class="clock" id="clock">${Math.ceil(ATIME/1000)}</div><div class="teams" id="chips"></div>
   <div class="actions"><button class="ghost" id="skip" type="button">Reveal now</button></div></section>`;
   paintChips();document.getElementById("skip").onclick=endAsk;
 }
 function viewReveal(){
-  const rv=H.rv,list=rv.list,mi=list[rv.k],m=H.rounds[H.round][mi],T=[H.teams[m.a],H.teams[m.b]],last=H.pi===NPROMPT-1;
+  const rv=H.rv,list=rv.list,mi=list[rv.k],m=H.rounds[H.round][mi],T=[H.teams[m.a],H.teams[m.b]],last=H.pi===NP()-1;
   if(!rv.res){rv.res=roomResults();saveH()}
   stage.textContent=ROUNDS[H.round]+" · Room "+(rv.k+1)+" of "+list.length;
   const card=t=>{const r=rv.res[t];return `<div class="acard ${t?"r":"l"}" style="--c:${T[t].color}"><div class="who">${esc(T[t].name)}</div>
@@ -769,7 +770,7 @@ function viewReveal(){
   app.querySelectorAll(".adj").forEach(b=>b.onclick=()=>{if(H.rv.step!=="judge")return;const t=+b.dataset.t,r=H.rv.res[t];r.d=Math.max(0,Math.min(MAXD,r.d+(+b.dataset.d)));document.getElementById("d"+t).textContent=r.d;saveH()});
   if(rv.step==="judge")foot("SCORE IT",confirmRoom);else{app.querySelectorAll(".adj").forEach(b=>b.disabled=true);footNext(m,last)}
 }
-function hudDepth(m){[0,1].forEach(t=>{const f=document.getElementById("f"+t),n=document.getElementById("n"+t);if(!f)return;f.style.width=Math.min(100,m.s[t]/(NPROMPT*MAXD)*100)+"%";n.textContent="Depth "+m.s[t]})}
+function hudDepth(m){[0,1].forEach(t=>{const f=document.getElementById("f"+t),n=document.getElementById("n"+t);if(!f)return;f.style.width=Math.min(100,m.s[t]/(NP()*MAXD)*100)+"%";n.textContent="Depth "+m.s[t]})}
 function foot(label,fn){const f=document.querySelector(".foot");if(!f)return;f.innerHTML=`<button class="cta" id="adv" type="button">${label}</button><span class="note">or press Space</span>`;const b=document.getElementById("adv");b.onclick=fn;b.focus()}
 function banner(big,sub){const b=document.getElementById("banner");if(b)b.innerHTML=(big?`<div class="big">${big}</div>`:"")+(sub?`<div class="sub">${sub}</div>`:"")}
 function floatDmg(t,txt,good){const g=document.getElementById("g"+t);if(!g)return;const d=document.createElement("div");d.className="dmg"+(good?" good":"");d.textContent=txt;g.appendChild(d);setTimeout(()=>d.remove(),1400)}
@@ -777,7 +778,7 @@ function pose(t,p,opt){if(!A)return;const f=A.f[t];if(f.dead)return;f.act=p;f.t0
   if(p==="hurt"){A.shake=Math.max(A.shake,5);spawn(f.x+16,GY-30,16,2.6,["#fff","#ffcc00","#ff6a1a"])}}
 function confirmRoom(){
   const rv=H.rv;if(rv.step!=="judge")return;rv.step="anim";
-  const m=H.rounds[H.round][rv.list[rv.k]],res=rv.res,last=H.pi===NPROMPT-1,T=[H.teams[m.a],H.teams[m.b]];
+  const m=H.rounds[H.round][rv.list[rv.k]],res=rv.res,last=H.pi===NP()-1,T=[H.teams[m.a],H.teams[m.b]];
   app.querySelectorAll(".adj").forEach(b=>b.disabled=true);document.querySelector(".foot").innerHTML="";
   [0,1].forEach(t=>{m.s[t]+=res[t].d;m.t[t]+=res[t].ms});m.last=res.map(r=>({text:r.text,d:r.d}));
   const d0=res[0].d,d1=res[1].d;let wait=500;
@@ -821,7 +822,7 @@ function viewPlayer(){
   else if(s.phase==="ask"){
     if(!me.inm)h=`<h2>Sit tight</h2><p class="note">You are not in this round.</p>`;
     else if(P.pend&&P.pend.askId===s.askId)h=`<h2>Locked in</h2><p class="typed">${esc(P.pend.text)}</p><p class="note">${P.pend.ok?"Eyes on the big screen.":"Sending..."}</p>`;
-    else h=`<p class="call">${FIGHT[s.pi]||"Fight!"}</p><div class="qmeta">Prompt ${s.pi+1} of ${s.n}</div><h2>${esc(s.prompt)}</h2><div class="clock" id="pclock"></div>
+    else h=`<p class="call">${s.n===1?"Sudden death. Fight!":FIGHT[s.pi]||"Fight!"}</p><div class="qmeta">Prompt ${s.pi+1} of ${s.n}</div><h2>${esc(s.prompt)}</h2><div class="clock" id="pclock"></div>
       <form id="af"><input id="ai" maxlength="60" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type one answer" aria-label="Your answer"><button class="cta" type="submit">LOCK IN</button></form>
       <p class="note">One answer only. Rarer is deeper.</p>`}
   else h=`<h2>Reveal time</h2><p class="note">Watch the big screen.</p>${me.last?`<p class="typed">${me.last.text?esc(me.last.text):"No answer"}</p><p class="note">Depth ${me.last.d} this prompt. Total ${me.total}.</p>`:""}`;
