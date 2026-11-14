@@ -610,7 +610,7 @@ function connect(code,onmsg,onready){
 /* ---------- host ---------- */
 let H=null,NET=null,askTimer=null,beat=null;
 const saveH=()=>ss.set("ko304host",H);
-function hostCreate(){H={code:rid(4),teams:[],rounds:null,round:0,pi:0,deck:[],phase:"lobby",cur:null,rv:null,burn:[]};ss.set("ko304role","host");hostBoot()}
+function hostCreate(){H={code:"0117",teams:[],rounds:null,round:0,pi:0,deck:[],phase:"lobby",cur:null,rv:null,burn:[]};ss.set("ko304role","host");hostBoot()}
 function hostBoot(){NET=connect(H.code,hostMsg,pub);clearInterval(beat);beat=setInterval(pub,2500);saveH();render();
   if(H.phase==="ask")askTick(true);if(H.phase==="reveal")viewReveal()}
 function hostMsg(m){
@@ -682,7 +682,7 @@ function render(){
   if(H.phase==="reveal")return viewReveal();if(H.phase==="champ")return viewChamp();
 }
 function viewHome(){
-  stage.textContent="";const pre=(new URLSearchParams(location.search).get("code")||"").toUpperCase().slice(0,4);
+  stage.textContent="";const pre=(new URLSearchParams(location.search).get("code")||"0117").toUpperCase().slice(0,4);
   app.innerHTML=`<section class="homev"><div class="hcard">
     <div class="eyebrow"><span>The arena · Team check-in</span><i aria-hidden="true"></i></div>
     <h1>Scholars, get into your teams.</h1><p class="hsub">Pick your colors. Name your team. Find your rival.</p>
@@ -691,7 +691,7 @@ function viewHome(){
       <label class="f">Team name<input id="jn" maxlength="18" autocomplete="off" placeholder="e.g. The Leadership Lens"></label>
       <div class="hrow"><span>Team colors</span><div class="sw" role="radiogroup" aria-label="Team colors">${COLORS.map((c,i)=>`<label><input type="radio" name="col" value="${c}" ${i===0?"checked":""} aria-label="Color ${i+1}"><span style="--c:${c}"></span></label>`).join("")}</div></div>
       <div class="prev"><canvas id="hcv" width="32" height="48"></canvas><span>YOUR<br>FIGHTER</span></div>
-      <p class="err" id="jerr" hidden>Enter the 4-letter code and a team name.</p>
+      <p class="err" id="jerr" hidden>Enter the 4-character code and a team name.</p>
       <button class="cta join" type="submit"><span>JOIN THE FIGHT</span><span aria-hidden="true">&rarr;</span></button></form>
     <p class="hfoot">Running the room? <button class="link" id="host" type="button">Host a game</button></p>
   </div></section>`;
@@ -703,9 +703,9 @@ function viewHome(){
     if(c.length!==4||!n){document.getElementById("jerr").hidden=false;return}playerJoin(c,n,col())};
 }
 function viewLobby(){
-  stage.textContent="Lobby";const url=location.origin+location.pathname;
+  stage.textContent="Lobby";const url=location.origin+location.pathname.replace(/index\.html$/,"");
   app.innerHTML=`<section class="lobby"><h1 class="call">Scholars, get into your teams.</h1><div class="codebox"><span>Room code</span><b>${H.code}</b></div>
-  <div class="joinrow"><div id="qr"></div><p class="note">Join on your phone at<br><b class="url">${esc(url.replace(/^https?:\/\//,""))}</b></p></div>
+  <div class="joinrow"><div id="qr"></div><p class="note">Join on your phone at<br><b class="url">${esc(url.replace(/^https?:\/\//,"").replace(/\/$/,""))}</b></p></div>
   <div class="teams">${Array.from({length:8},(_,i)=>{const t=H.teams[i];return `<div class="trow">${t?`<span class="chip" style="background:${t.color}"></span><b>${esc(t.name)}</b>`:`<span class="note">Waiting for team ${i+1}</span>`}</div>`}).join("")}</div>
   <div class="actions"><button class="cta" id="start" type="button" ${H.teams.length<2?"disabled":""}>START TOURNAMENT</button><span class="note">${H.teams.length} of 8 teams in. Needs at least 2.</span></div></section>`;
   document.getElementById("start").onclick=()=>{if(H.teams.length<2)return;buildBracket();H.phase="bracket";saveH();pub();sfx.go();render()};
