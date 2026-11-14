@@ -551,6 +551,7 @@ function drawArena(now){
 /* 304 Knockout: networked game. The host tab runs the tournament; phones join with a room code and type answers. */
 const CFG={url:"https://eibeytehvdsyekbcmryr.supabase.co",key:"sb_publishable_xHUEMGOoMQDUNBmjE7kFVw_1L0YiBIm"};
 const LIVE=CFG.url.indexOf("http")===0;
+const CNAME=["Red","Blue","Gold","Green","Purple","Orange","Teal","Pink"];
 const COLORS=["#ff6b6b","#4dc9ff","#ffc93c","#7be07b","#c58bff","#ff9f43","#5ff0d0","#ff7ac8"];
 const FINS=[["burn","INCINERATED",0],["melt","LIQUIDATED",0],["snakes","SNAKE PIT",0],["halve","SPLIT DECISION",1],["behead","HEADS ROLL",1],["stab","RUN THROUGH",1],["ko","LAVA BATH",0]];
 const ROUNDS=["Quarterfinals","Semifinals","Final"],ATIME=40000,MAXD=5;
@@ -709,8 +710,8 @@ function viewLobby(){
   app.innerHTML=`<section class="lobby"><h1 class="call">Scholars, get into your teams.</h1><div class="codebox"><span>Room code</span><b>${H.code}</b></div>
   <div class="joinrow"><div id="qr"></div><p class="note">Join on your phone at<br><b class="url">${esc(url.replace(/^https?:\/\//,"").replace(/\/$/,""))}</b></p></div>
   <div class="teams">${Array.from({length:8},(_,i)=>{const t=H.teams[i];return `<div class="trow">${t?`<span class="chip" style="background:${t.color}"></span><b>${esc(t.name)}</b>`:`<span class="note">Waiting for team ${i+1}</span>`}</div>`}).join("")}</div>
-  <div class="actions"><button class="cta" id="start" type="button" ${H.teams.length<1?"disabled":""}>START TOURNAMENT</button><span class="note">${H.teams.length} of 8 teams in. Empty slots fill with bots that always lose.</span></div></section>`;
-  document.getElementById("start").onclick=()=>{if(H.teams.length<1)return;for(let n=1;H.teams.length<8;n++){const used=H.teams.map(x=>x.color);H.teams.push({id:"bot"+n,name:"Bot "+n,bot:true,color:COLORS.find(c=>used.indexOf(c)<0)||COLORS[n%8]})}buildBracket();H.phase="bracket";saveH();pub();sfx.go();render()};
+  <div class="actions"><button class="cta" id="start" type="button" ${H.teams.length<1?"disabled":""}>START TOURNAMENT</button><span class="note">${H.teams.length} of 8 teams in. Empty slots fill with stand-in scholars who always lose.</span></div></section>`;
+  document.getElementById("start").onclick=()=>{if(H.teams.length<1)return;for(let n=1;H.teams.length<8;n++){const used=H.teams.map(x=>x.color);const c=COLORS.find(c=>used.indexOf(c)<0)||COLORS[n%8];H.teams.push({id:"bot"+n,name:CNAME[COLORS.indexOf(c)]+" Scholar",bot:true,color:c})}buildBracket();H.phase="bracket";saveH();pub();sfx.go();render()};
   try{if(window.qrcode){const q=qrcode(0,"M");q.addData(url+"?code="+H.code);q.make();document.getElementById("qr").innerHTML=q.createSvgTag({cellSize:5,margin:2})}}catch(e){}
 }
 function sideHTML(m,t,si){
@@ -742,7 +743,7 @@ function drawWires(){
 }
 window.addEventListener("resize",drawWires);
 function paintChips(){const box=document.getElementById("chips");if(!box||!H||!H.cur)return;
-  box.innerHTML=activeTeams().map(i=>{const t=H.teams[i],inn=!!H.cur.ans[t.id];return `<div class="trow ${inn?"in":""}"><span class="chip" style="background:${t.color}"></span><b>${esc(t.name)}</b><span class="st">${t.bot?"BOT":inn?"LOCKED IN":"typing"}</span></div>`}).join("")}
+  box.innerHTML=activeTeams().map(i=>{const t=H.teams[i],inn=!!H.cur.ans[t.id];return `<div class="trow ${inn?"in":""}"><span class="chip" style="background:${t.color}"></span><b>${esc(t.name)}</b><span class="st">${t.bot?"STAND-IN":inn?"LOCKED IN":"typing"}</span></div>`}).join("")}
 const FIGHT=["Round one. Fight!","Round two. Fight!","Final round. Fight!"];
 function viewAsk(){
   stage.textContent=ROUNDS[H.round]+" · Prompt "+(H.pi+1)+" of "+NP();
