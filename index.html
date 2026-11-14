@@ -621,7 +621,7 @@ function hostMsg(m){
   else if(m.t==="hello")pub();
   else if(m.t==="ans"&&H.phase==="ask"&&H.cur&&m.askId===H.cur.askId){const ti=H.teams.findIndex(x=>x.id===m.id);
     if(ti>-1&&activeTeams().indexOf(ti)>-1&&!H.cur.ans[m.id]){H.cur.ans[m.id]={text:String(m.text||"").slice(0,60),ms:Math.min(ATIME,Math.max(0,+m.ms||ATIME))};sfx.lock();saveH();pub();paintChips();
-      if(activeTeams().every(i=>H.cur.ans[H.teams[i].id]))setTimeout(()=>{if(H.phase==="ask")endAsk()},600)}}
+      if(activeTeams().every(i=>H.teams[i].bot||H.cur.ans[H.teams[i].id]))setTimeout(()=>{if(H.phase==="ask")endAsk()},600)}}
 }
 const liveMatches=()=>H.rounds?H.rounds[H.round].map((m,i)=>({m,i})).filter(x=>x.m.ready&&!x.m.done&&x.m.a!=null&&x.m.b!=null):[];
 const activeTeams=()=>liveMatches().reduce((a,x)=>a.concat([x.m.a,x.m.b]),[]);
@@ -643,7 +643,8 @@ function buildBracket(){
 function settle(){
   for(let r=0;r<3;r++)H.rounds[r].forEach((m,i)=>{
     if(r>0){const fa=H.rounds[r-1][2*i],fb=H.rounds[r-1][2*i+1];if(!fa.done||!fb.done){m.ready=false;return}m.a=fa.w;m.b=fb.w}
-    m.ready=true;if(!m.done&&(m.a==null||m.b==null)){m.w=m.a!=null?m.a:m.b;m.done=true;m.bye=true}});
+    m.ready=true;if(!m.done&&(m.a==null||m.b==null)){m.w=m.a!=null?m.a:m.b;m.done=true;m.bye=true}
+    else if(!m.done&&H.teams[m.a].bot&&H.teams[m.b].bot){m.w=m.a;m.done=true;m.bye=true}});
   for(let r=0;r<3;r++)if(H.rounds[r].some(m=>m.ready&&!m.done)){H.round=r;return}
 }
 function startPrompt(){
@@ -707,8 +708,8 @@ function viewLobby(){
   app.innerHTML=`<section class="lobby"><h1 class="call">Scholars, get into your teams.</h1><div class="codebox"><span>Room code</span><b>${H.code}</b></div>
   <div class="joinrow"><div id="qr"></div><p class="note">Join on your phone at<br><b class="url">${esc(url.replace(/^https?:\/\//,"").replace(/\/$/,""))}</b></p></div>
   <div class="teams">${Array.from({length:8},(_,i)=>{const t=H.teams[i];return `<div class="trow">${t?`<span class="chip" style="background:${t.color}"></span><b>${esc(t.name)}</b>`:`<span class="note">Waiting for team ${i+1}</span>`}</div>`}).join("")}</div>
-  <div class="actions"><button class="cta" id="start" type="button" ${H.teams.length<2?"disabled":""}>START TOURNAMENT</button><span class="note">${H.teams.length} of 8 teams in. Needs at least 2.</span></div></section>`;
-  document.getElementById("start").onclick=()=>{if(H.teams.length<2)return;buildBracket();H.phase="bracket";saveH();pub();sfx.go();render()};
+  <div class="actions"><button class="cta" id="start" type="button" ${H.teams.length<1?"disabled":""}>START TOURNAMENT</button><span class="note">${H.teams.length} of 8 teams in. Empty slots fill with bots that always lose.</span></div></section>`;
+  document.getElementById("start").onclick=()=>{if(H.teams.length<1)return;for(let n=1;H.teams.length<8;n++){const used=H.teams.map(x=>x.color);H.teams.push({id:"bot"+n,name:"Bot "+n,bot:true,color:COLORS.find(c=>used.indexOf(c)<0)||COLORS[n%8]})}buildBracket();H.phase="bracket";saveH();pub();sfx.go();render()};
   try{if(window.qrcode){const q=qrcode(0,"M");q.addData(url+"?code="+H.code);q.make();document.getElementById("qr").innerHTML=q.createSvgTag({cellSize:5,margin:2})}}catch(e){}
 }
 function sideHTML(m,t,si){
@@ -740,7 +741,7 @@ function drawWires(){
 }
 window.addEventListener("resize",drawWires);
 function paintChips(){const box=document.getElementById("chips");if(!box||!H||!H.cur)return;
-  box.innerHTML=activeTeams().map(i=>{const t=H.teams[i],inn=!!H.cur.ans[t.id];return `<div class="trow ${inn?"in":""}"><span class="chip" style="background:${t.color}"></span><b>${esc(t.name)}</b><span class="st">${inn?"LOCKED IN":"typing"}</span></div>`}).join("")}
+  box.innerHTML=activeTeams().map(i=>{const t=H.teams[i],inn=!!H.cur.ans[t.id];return `<div class="trow ${inn?"in":""}"><span class="chip" style="background:${t.color}"></span><b>${esc(t.name)}</b><span class="st">${t.bot?"BOT":inn?"LOCKED IN":"typing"}</span></div>`}).join("")}
 const FIGHT=["Round one. Fight!","Round two. Fight!","Final round. Fight!"];
 function viewAsk(){
   stage.textContent=ROUNDS[H.round]+" · Prompt "+(H.pi+1)+" of "+NPROMPT;
@@ -789,7 +790,7 @@ function confirmRoom(){
   setTimeout(()=>{
     if(!H||H.rv!==rv)return;
     if(!last){rv.step="done";saveH();pub();return footNext(m,false)}
-    let w=m.s[0]>m.s[1]?0:m.s[1]>m.s[0]?1:m.t[0]<m.t[1]?0:m.t[1]<m.t[0]?1:Math.random()<.5?0:1;const tie=m.s[0]===m.s[1];
+    let w=m.s[0]>m.s[1]?0:m.s[1]>m.s[0]?1:m.t[0]<m.t[1]?0:m.t[1]<m.t[0]?1:Math.random()<.5?0:1;const tie=m.s[0]===m.s[1];if(H.teams[m.a].bot!==H.teams[m.b].bot)w=H.teams[m.a].bot?1:0;
     m.w=w?m.b:m.a;m.done=true;H.burn.push(w?m.a:m.b);
     const F=FINS[(H.fins||0)%FINS.length],fin=F[0];H.fins=(H.fins||0)+1;
     banner("FINAL BLOW",tie?"Tied on depth. Faster team advances.":"");
