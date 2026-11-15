@@ -564,26 +564,30 @@ const ss={get:k=>{try{return JSON.parse(sessionStorage.getItem(k))}catch(e){retu
 
 /* Prompts: each answer is [depth, display name, ...aliases]. Depth 1 = the obvious answer, 5 = the one few people remember. Depths are a judgment call; the host can adjust any score at reveal. */
 const PROMPTS=[
-{q:"List as many of the five bases of power as you can.",a:[[1,"Legitimate","legitimate authority","formal authority","authority","position"],[1,"Reward","rewards"],[1,"Coercive","coercion","punishment","punish"],[1,"Expert","expertise","knowledge"],[1,"Referent","reference","referant","charisma"]]},
-{q:"List as many of the nine influence tactics as you can.",a:[[1,"Rational persuasion","rational","logic","facts"],[1,"Inspirational appeal","inspirational","inspiration","inspire"],[1,"Consultation","consult","consulting"],[1,"Ingratiation","flattery","ingratiating","compliment"],[1,"Personal appeal","personal","friendship"],[1,"Exchange","trade","favors"],[1,"Coalition","coalitions"],[1,"Pressure","threats","demands"],[1,"Legitimating","legitimizing","legitimation","legitimate"]]},
-{q:"List as many of Cialdini's six principles of persuasion as you can.",a:[[1,"Liking","like","likability"],[1,"Reciprocity","reciprocation","reciprocate"],[1,"Social proof","proof","consensus"],[1,"Consistency","commitment"],[1,"Authority","expertise"],[1,"Scarcity","scarce"]]},
-{q:"List as many of the Big Five personality traits as you can.",a:[[1,"Openness","open"],[1,"Conscientiousness","conscientious"],[1,"Extraversion","extroversion","extravert","extrovert"],[1,"Agreeableness","agreeable"],[1,"Emotional stability","neuroticism","stability","neurotic"]]},
-{q:"List as many of the five conflict-handling styles as you can.",a:[[1,"Collaborating","integrating","collaborate","collaboration","integrate"],[1,"Competing","dominating","compete","dominate"],[1,"Accommodating","obliging","accommodate","oblige","accomodating"],[1,"Avoiding","avoid","avoidance"],[1,"Compromising","compromise"]]},
-{q:"List as many levels of Maslow's hierarchy as you can.",a:[[1,"Physiological","physical","food","basic"],[1,"Safety","security"],[1,"Love and belonging","belonging","love","social"],[1,"Esteem","respect"],[1,"Self-actualization","actualization","self actualisation"]]},
-{q:"List the three needs in self-determination theory.",a:[[1,"Competence","competency","competent"],[1,"Autonomy","autonomous"],[1,"Relatedness","related","connection","belonging"]]},
-{q:"List McClelland's three needs.",a:[[1,"Achievement","nach","achieve"],[1,"Affiliation","naff","affiliate"],[1,"Power","npow","influence"]]},
-{q:"List as many of the five core job dimensions as you can.",a:[[1,"Skill variety","variety","skills"],[1,"Task identity","identity"],[1,"Task significance","significance"],[1,"Autonomy"],[1,"Feedback"]]},
-{q:"List the three parts of expectancy theory.",a:[[1,"Expectancy","effort to performance"],[1,"Instrumentality","performance to reward"],[1,"Valence","value"]]},
-{q:"List the four parts of PsyCap (HERO).",a:[[1,"Hope"],[1,"Efficacy","self efficacy","confidence"],[1,"Resilience","resilient"],[1,"Optimism","optimistic"]]},
-{q:"List as many parts of PERMA as you can.",a:[[1,"Positive emotions","positive","emotions"],[1,"Engagement","engaged"],[1,"Relationships","relationship"],[1,"Meaning","purpose"],[1,"Achievement","accomplishment"]]},
-{q:"List as many decision-making biases as you can.",a:[[1,"Confirmation","confirmation bias"],[1,"Overconfidence","overconfident"],[1,"Availability"],[1,"Representativeness","representative"],[1,"Anchoring","anchor"],[1,"Hindsight"],[1,"Framing","frame"],[1,"Escalation of commitment","escalation","sunk cost","sunk costs"]]},
-{q:"List the three types of organizational justice.",a:[[1,"Distributive","outcome"],[1,"Procedural","process"],[1,"Interactional","interpersonal","informational","respect"]]},
-{q:"List the three types of organizational commitment.",a:[[1,"Affective","want"],[1,"Continuance","need"],[1,"Normative","ought"]]},
-{q:"List the four responses in EVLN.",a:[[1,"Exit","leave","quit"],[1,"Voice","speak up"],[1,"Loyalty","loyal"],[1,"Neglect"]]},
-{q:"List what the letters in SMART goals stand for.",a:[[1,"Specific"],[1,"Measurable","measure"],[1,"Attainable","achievable"],[1,"Results-oriented","results","relevant","realistic"],[1,"Time-bound","time","timely","deadline"]]},
-{q:"List as many barriers to communication as you can.",a:[[1,"Selective perception","selective"],[1,"Filtering","filter"],[1,"Information overload","overload"],[1,"Past experience","experience"],[1,"Emotions","emotion","mood"],[1,"Language","jargon"],[1,"Communication apprehension","apprehension","anxiety"],[1,"Physical barriers","physical","noise","distance"],[1,"Cross-cultural differences","culture","cultural","cross cultural"]]},
-{q:"List as many NAI programs for scholars or families as you can.",a:[[1,"Saturday Academy","saturday","saturday school"],[1,"The Ambassadors","ambassadors","ambassador"],[1,"USC scholarship","scholarship","full tuition","tuition"],[1,"Weekday morning classes","morning classes","morning"],[1,"Family Development Institute","family development","fdi","family workshops","parent workshops"],[1,"Summer bridge","bridge","summer"],[1,"Junior Advisors","junior advisor","advisors"]]},
-{q:"From our study: list the kinds of power and influence NAI's leaders rely on.",a:[[1,"Referent power","referent"],[1,"Expert power","expert","expertise"],[1,"Consultation","consult"],[1,"Inspirational appeals","inspirational","inspiration"],[1,"Empowerment","ownership","empower"],[1,"Social proof","living proof","alumni stories","proof"],[1,"Personal power","personal"]]}
+{q:"Theory Y: list what a Theory Y leader believes about people.",core:1,a:[[1,"Self-motivated","motivated","self motivated","driven"],[1,"Enjoy work","like work","likes work","enjoys work","want to work"],[1,"Responsible","responsibility","accountable"],[1,"Self-directed","self direction","self directed","autonomous","autonomy"],[1,"Trustworthy","trust","trusted"],[1,"Creative","creativity"],[1,"Capable","competent","capable of growth","growth"],[1,"Deserve empowerment","empower","empowered","empowerment"]]},
+{q:"Theory X: list what a Theory X leader believes about people.",core:1,a:[[1,"Lazy"],[1,"Dislike work","hate work","avoid work","dislikes work"],[1,"Need control","control","controlled","controlling"],[1,"Need threats","threats","punishment","punish","coerced","coercion","forced"],[1,"Avoid responsibility","irresponsible"],[1,"Need supervision","supervision","micromanage","micromanaged","watched","monitored"],[1,"Motivated by money","money","pay","security"]]},
+{q:"List as many of the five bases of power as you can.",core:1,a:[[1,"Legitimate","legitimate authority","formal authority","authority","position"],[1,"Reward","rewards"],[1,"Coercive","coercion","punishment","punish"],[1,"Expert","expertise","knowledge"],[1,"Referent","reference","referant","charisma"]]},
+{q:"Personal power: list the two bases that come from the person, not the title.",core:1,a:[[1,"Expert","expertise","knowledge"],[1,"Referent","reference","referant","charisma"]]},
+{q:"Positional power: list the three bases that come from the title.",core:1,a:[[1,"Legitimate","legitimate authority","formal authority","authority"],[1,"Reward","rewards"],[1,"Coercive","coercion","punishment","punish"]]},
+{q:"Referent power: list what earns a leader referent power.",core:1,a:[[1,"Respect","respected"],[1,"Trust","trusted"],[1,"Charisma","charismatic"],[1,"Admiration","admired","admire"],[1,"Relationships","relationship","connection","network"],[1,"Identification","identify","role model","relatable"],[1,"Liking","liked","likable"]]},
+{q:"List the three outcomes of using power.",core:1,a:[[1,"Resistance","resist"],[1,"Compliance","comply"],[1,"Commitment","committed","buy in"]]},
+{q:"Self-determination theory: list the three needs.",core:1,a:[[1,"Competence","competency","competent"],[1,"Autonomy","autonomous"],[1,"Relatedness","related","connection","belonging"]]},
+{q:"List ways to motivate people without paying them more.",core:1,a:[[1,"Recognition","praise","credit","recognize"],[1,"Autonomy","freedom","choice"],[1,"Growth","development","learning","advancement","mentoring"],[1,"Meaning","purpose","mission"],[1,"Belonging","relatedness","relationships","community"],[1,"Achievement","accomplishment"],[1,"Responsibility","ownership"],[1,"Feedback"],[1,"Competence","mastery"],[1,"Goals","goal setting"]]},
+{q:"List the soft influence tactics.",core:1,a:[[1,"Rational persuasion","rational","logic","facts"],[1,"Inspirational appeal","inspirational","inspiration","inspire"],[1,"Consultation","consult","consulting"],[1,"Ingratiation","flattery","ingratiating","compliment"],[1,"Personal appeal","personal","friendship"]]},
+{q:"List the hard influence tactics.",core:1,a:[[1,"Exchange","trade","favors"],[1,"Coalition","coalitions"],[1,"Pressure","threats","demands"],[1,"Legitimating","legitimizing","legitimation","legitimate"]]},
+{q:"McClelland: list the three needs.",core:1,a:[[1,"Achievement","nach","achieve"],[1,"Affiliation","naff","affiliate"],[1,"Power","npow","influence"]]},
+{q:"Herzberg: list the motivators.",core:1,a:[[1,"Achievement"],[1,"Recognition"],[1,"The work itself","work itself","the work","work"],[1,"Responsibility"],[1,"Advancement","growth","promotion"]]},
+{q:"Psychological empowerment: list its four parts.",core:1,a:[[1,"Meaning"],[1,"Competence","competency"],[1,"Self-determination","self determination","autonomy","choice"],[1,"Impact"]]},
+{q:"List as many NAI programs for scholars or families as you can.",core:1,a:[[1,"Saturday Academy","saturday","saturday school"],[1,"The Ambassadors","ambassadors","ambassador"],[1,"USC scholarship","scholarship","full tuition","tuition"],[1,"Weekday morning classes","morning classes","morning"],[1,"Family Development Institute","family development","fdi","family workshops","parent workshops"],[1,"Summer bridge","bridge","summer"],[1,"Junior Advisors","junior advisor","advisors"]]},
+{q:"From our study: list the kinds of power and influence NAI's leaders rely on.",core:1,a:[[1,"Referent power","referent"],[1,"Expert power","expert","expertise"],[1,"Consultation","consult"],[1,"Inspirational appeals","inspirational","inspiration"],[1,"Empowerment","ownership","empower"],[1,"Social proof","living proof","alumni stories","proof"],[1,"Personal power","personal"]]},
+{q:"List as many of the nine influence tactics as you can.",core:0,a:[[1,"Rational persuasion","rational","logic","facts"],[1,"Inspirational appeal","inspirational","inspiration","inspire"],[1,"Consultation","consult","consulting"],[1,"Ingratiation","flattery","ingratiating","compliment"],[1,"Personal appeal","personal","friendship"],[1,"Exchange","trade","favors"],[1,"Coalition","coalitions"],[1,"Pressure","threats","demands"],[1,"Legitimating","legitimizing","legitimation","legitimate"]]},
+{q:"List as many of Cialdini's six principles of persuasion as you can.",core:0,a:[[1,"Liking","like","likability"],[1,"Reciprocity","reciprocation","reciprocate"],[1,"Social proof","proof","consensus"],[1,"Consistency","commitment"],[1,"Authority","expertise"],[1,"Scarcity","scarce"]]},
+{q:"Herzberg: list the hygiene factors.",core:0,a:[[1,"Company policy","policy","policies"],[1,"Supervision","supervisor"],[1,"Salary","pay","money","wages"],[1,"Relationship with boss","boss","relationships"],[1,"Working conditions","conditions"],[1,"Job security","security"]]},
+{q:"List as many levels of Maslow's hierarchy as you can.",core:0,a:[[1,"Physiological","physical","food","basic"],[1,"Safety","security"],[1,"Love and belonging","belonging","love","social"],[1,"Esteem","respect"],[1,"Self-actualization","actualization","self actualisation"]]},
+{q:"Expectancy theory: list its three parts.",core:0,a:[[1,"Expectancy","effort to performance"],[1,"Instrumentality","performance to reward"],[1,"Valence","value"]]},
+{q:"Conger: list the four steps of persuasion.",core:0,a:[[1,"Establish credibility","credibility","credible"],[1,"Frame for common ground","common ground","frame","framing"],[1,"Vivid evidence","evidence","stories","story","vivid"],[1,"Connect emotionally","emotionally","emotion","emotions","emotional"]]},
+{q:"List as many of the five conflict-handling styles as you can.",core:0,a:[[1,"Collaborating","integrating","collaborate","collaboration","integrate"],[1,"Competing","dominating","compete","dominate"],[1,"Accommodating","obliging","accommodate","oblige","accomodating"],[1,"Avoiding","avoid","avoidance"],[1,"Compromising","compromise"]]},
+{q:"List as many motivation theories from this course as you can.",core:0,a:[[1,"Maslow's hierarchy","maslow","hierarchy"],[1,"ERG"],[1,"McClelland's needs","mcclelland","acquired needs"],[1,"Herzberg's two-factor","herzberg","two factor","hygiene"],[1,"Self-determination theory","self determination","sdt"],[1,"Theory X and Y","theory x","theory y","mcgregor"],[1,"Expectancy theory","expectancy"],[1,"Equity theory","equity"],[1,"Goal-setting theory","goal setting","goals"],[1,"Job characteristics model","job characteristics","jcm"]]}
 ];
 const STOP=/\b(the|a|an|of|to|for|and|power|bias|biases|effect|error|theory|need|needs|principle|style|tactic|tactics|appeal|appeals|model|commitment|justice|barriers|barrier)\b/g;
 const norm=s=>String(s).toLowerCase().replace(/&/g," and ").replace(/[^a-z0-9 ]/g," ").replace(STOP," ").replace(/\s+/g," ").trim();
@@ -601,7 +605,7 @@ function judge(pr,text){
   const raw=String(text||""),hit=[],add=e=>{if(e&&hit.indexOf(e)<0)hit.push(e)};
   raw.split(/[,;\n\/+]|\band\b|&/i).map(x=>x.trim()).filter(Boolean).forEach(x=>add(judge1(pr,x)));
   const whole=" "+norm(raw)+" ",plain=" "+raw.toLowerCase().replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim()+" ";
-  pr.a.forEach(e=>{for(let i=1;i<e.length;i++){const al=norm(e[i]),pl=e[i].toLowerCase().replace(/[^a-z0-9 ]/g," ").trim();if((al.length>=4&&whole.indexOf(" "+al+" ")>-1)||(pl.length>=4&&plain.indexOf(" "+pl+" ")>-1)){add(e);break}}});
+  pr.a.forEach(e=>{for(let i=1;i<e.length;i++){const al=norm(e[i]),pl=e[i].toLowerCase().replace(/[^a-z0-9 ]/g," ").trim();if((al.length>=4&&whole.indexOf(" "+al+" ")>-1)||(pl.length>=3&&plain.indexOf(" "+pl+" ")>-1)){add(e);break}}});
   return{d:Math.min(MAXD,hit.length),name:hit.map(e=>e[1]).join(", ")};
 }
 
@@ -654,7 +658,7 @@ function buildBracket(){
   const order=[0,4,2,6,1,5,3,7],slots=Array(8).fill(null);H.teams=shuffle(H.teams);H.teams.forEach((t,i)=>{slots[order[i]]=i});
   const mk=(a,b)=>({a,b,w:null,done:false,s:[0,0],t:[0,0]});
   H.rounds=[[0,1,2,3].map(i=>mk(slots[2*i],slots[2*i+1])),[mk(null,null),mk(null,null)],[mk(null,null)]];
-  H.deck=shuffle(PROMPTS.map((_,i)=>i));H.round=0;H.pi=0;settle();
+  H.deck=(()=>{const ix=PROMPTS.map((_,i)=>i);return shuffle(ix.filter(i=>!PROMPTS[i].core)).concat(shuffle(ix.filter(i=>PROMPTS[i].core)))})();H.round=0;H.pi=0;settle();
 }
 function settle(){
   for(let r=0;r<3;r++)H.rounds[r].forEach((m,i)=>{
@@ -664,7 +668,7 @@ function settle(){
   for(let r=0;r<3;r++)if(H.rounds[r].some(m=>m.ready&&!m.done)){H.round=r;return}
 }
 function startPrompt(){
-  if(!H.deck.length)H.deck=shuffle(PROMPTS.map((_,i)=>i));
+  if(!H.deck.length)H.deck=(()=>{const ix=PROMPTS.map((_,i)=>i);return shuffle(ix.filter(i=>!PROMPTS[i].core)).concat(shuffle(ix.filter(i=>PROMPTS[i].core)))})();
   H.cur={askId:rid(6),prompt:PROMPTS[H.deck.pop()],end:Date.now()+ATIME,ans:{}};H.phase="ask";saveH();pub();sfx.go();render();askTick(true);
 }
 function askTick(start){
@@ -774,7 +778,7 @@ const FIGHT=["Round one. Fight!","Round two. Fight!","Final round. Fight!"];
 function viewAsk(){
   stage.textContent=ROUNDS[H.round]+" · Prompt "+(H.pi+1)+" of "+NP();
   app.innerHTML=`<section class="askv"><p class="call">${NP()===1?"Sudden death. Fight!":FIGHT[H.pi]||"Fight!"}</p><div class="qmeta">${ROUNDS[H.round]} · Prompt ${H.pi+1} of ${NP()} · Room ${H.code}</div>
-  <h1 class="prompt">${esc(H.cur.prompt.q)}</h1><p class="lede">List as many as you can on your phone, separated by commas. Every correct one adds depth.</p>
+  <h1 class="prompt">${esc(H.cur.prompt.q)}</h1><p class="lede">List as many as you can to win. Name them all or be finished.</p>
   <div class="clock" id="clock">${Math.ceil(ATIME/1000)}</div><div class="teams" id="chips"></div>
   <div class="actions"><button class="ghost" id="skip" type="button">Reveal now</button></div></section>`;
   paintChips();document.getElementById("skip").onclick=endAsk;
@@ -854,7 +858,7 @@ function viewPlayer(){
     else if(P.pend&&P.pend.askId===s.askId)h=`<h2>Locked in</h2><p class="typed">${esc(P.pend.text)}</p><p class="note">${P.pend.ok?"Eyes on the big screen.":"Sending..."}</p>`;
     else h=`<p class="call">${s.n===1?"Sudden death. Fight!":FIGHT[s.pi]||"Fight!"}</p><div class="qmeta">Prompt ${s.pi+1} of ${s.n}</div><h2>${esc(s.prompt)}</h2><div class="clock" id="pclock"></div>
       <form id="af"><input id="ai" maxlength="160" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="e.g. first, second, third" aria-label="Your answer"><button class="cta" type="submit">LOCK IN</button></form>
-      <p class="note">List as many as you can, separated by commas. One submission.</p>`}
+      <p class="note">List as many as you can to win. Name them all or be finished. Commas between answers, one submission.</p>`}
   else h=`<h2>Reveal time</h2><p class="note">Watch the big screen.</p>${me.last?`<p class="typed">${me.last.text?esc(me.last.text):"No answer"}</p><p class="note">Depth ${me.last.d} this prompt. Total ${me.total}.</p>`:""}`;
   app.innerHTML=`<section class="phone" style="--c:${me?me.color:"var(--gold)"}"><div class="me"><span class="chip" style="background:${me?me.color:"var(--dim)"}"></span><b>${esc(P.name)}</b></div>${h}</section>`;
   const af=document.getElementById("af");if(af){af.onsubmit=e=>{e.preventDefault();const v=document.getElementById("ai").value.trim();if(v)playerSubmit(v)};document.getElementById("ai").focus()}
