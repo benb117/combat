@@ -382,6 +382,7 @@ input{font-size:24px}
 .hcard .cta.join::before,.hcard .cta.join::after{content:none!important;display:none!important}
 .hcard .eyebrow i{width:20px;height:20px;flex:none;background:var(--hit);border:4px solid var(--gold);box-shadow:none;box-sizing:border-box}
 @media (max-width:560px){.hcard .eyebrow{font-size:13px;letter-spacing:.12em}.hcard{padding:22px 18px 18px}.homev{padding:12px 0 28px}}
+.pfx{gap:10px}.pfx .me{justify-content:center;gap:8px;flex-wrap:wrap}.pfx .arena{margin:0!important;width:100%;box-sizing:border-box}.pfx .banner .big{font-size:22px}.pfx .banner .sub{font-size:14px}
 </style></head><body>
 <header class="top wrap"><div class="brand">NAI <span>MORTAL COMBAT</span></div><div class="stage" id="stage"></div>
 <button class="ghost" id="snd" type="button">Sound: on</button><button class="ghost" id="reset" type="button" hidden>Leave game</button></header>
@@ -678,8 +679,20 @@ function roomResults(){const m=H.rounds[H.round][H.rv.list[H.rv.k]];
 /* ---------- player ---------- */
 let P=null,joinTimer=null,ansTimer=null,pClock=null;
 function playerJoin(code,name,color){P={id:(ss.get("ko304p")||{}).id||rid(10),code:code.toUpperCase(),name,color,st:null,pend:null,end:0};ss.set("ko304p",{id:P.id,code:P.code,name:P.name,color});ss.set("ko304role","player");playerBoot()}
+function playerFx(m){
+  if(!P||(m.a!==P.id&&m.b!==P.id))return;const key=m.a+m.b,fresh=!document.getElementById("cv")||!P.fx||P.fx.key!==key;
+  P.fx={key};P.fxN=(P.fxN||0)+1;P.fxEnd=Date.now()+(m.k==="fin"?9000:5000);const nm=[m.na,m.nb];
+  if(fresh){app.innerHTML=`<section class="phone pfx"><div class="me"><span class="chip" style="background:${m.ca}"></span><b>${esc(m.na)}</b><span class="note">vs</span><b>${esc(m.nb)}</b><span class="chip" style="background:${m.cb}"></span></div>
+    <div class="arena"><canvas id="cv" width="640" height="240" aria-hidden="true"></canvas><div class="banner" id="banner" aria-live="polite"></div></div></section>`;arenaStart(m.ca,m.cb)}
+  if(m.k==="hit"){const d0=m.d[0],d1=m.d[1],hit=(t,dl)=>setTimeout(()=>{pose(t,"atk");setTimeout(()=>pose(1-t,"hurt"),240)},dl);
+    if(d0===0&&d1===0)banner("","Nobody scored");else{if(d0>d1)hit(0,0);else if(d1>d0)hit(1,0);else{hit(0,0);hit(1,650)}banner("+"+d0+" vs +"+d1,d0===d1?"Equal depth":esc(nm[d0>d1?0:1])+" went deeper")}}
+  else{banner("FINAL BLOW","");const w=m.w;
+    setTimeout(()=>{pose(w,"atk",{blade:m.blade});setTimeout(()=>{if(!A)return;const f=A.f[1-w];f.act=m.fin;f.t0=performance.now();f.dead=true;A.shake=10},260)},700);
+    setTimeout(()=>{if(A&&!A.f[w].dead)A.f[w].act="win";banner(m.title,esc(nm[w])+" wins")},4600)}
+  clearTimeout(P.fxT);P.fxT=setTimeout(()=>{if(P){P.fx=null;render()}},P.fxEnd-Date.now());
+}
 function playerBoot(){
-  NET=connect(P.code,m=>{if(m&&m.t==="state"){const prev=P.st;P.st=m;if(m.phase==="ask"&&(!prev||prev.askId!==m.askId||!P.end))P.end=Date.now()+m.left;if(m.phase!=="ask")P.end=0;
+  NET=connect(P.code,m=>{if(m&&m.t==="fx")return playerFx(m);if(m&&m.t==="state"){if(m.phase==="ask"&&P.fx){P.fx=null;clearTimeout(P.fxT)}const prev=P.st;P.st=m;if(m.phase==="ask"&&(!prev||prev.askId!==m.askId||!P.end))P.end=Date.now()+m.left;if(m.phase!=="ask")P.end=0;
     const me=m.teams.find(x=>x.id===P.id);if(P.pend&&me&&me.sub&&P.pend.askId===m.askId){P.pend.ok=true}
     if(!prev||prev.phase!==m.phase||prev.askId!==m.askId||JSON.stringify(prev.teams)!==JSON.stringify(m.teams))render()}},
     ()=>{const hi=()=>{if(!P)return;const me=P.st&&P.st.teams.find(x=>x.id===P.id);if(me)return clearInterval(joinTimer);NET.send({t:"join",id:P.id,name:P.name,color:P.color})};hi();clearInterval(joinTimer);joinTimer=setInterval(hi,2000)});
@@ -800,6 +813,8 @@ function confirmRoom(){
   else{const hit=(t,dl)=>setTimeout(()=>{pose(t,"atk");setTimeout(()=>{pose(1-t,"hurt");sfx.hit()},240)},dl);
     if(d0>d1){hit(0,0);wait=900}else if(d1>d0){hit(1,0);wait=900}else{hit(0,0);hit(1,650);wait=1500}
     banner("",d0===d1?"Equal depth":esc(T[d0>d1?0:1].name)+" went deeper")}
+  const fxb={t:"fx",a:T[0].id,b:T[1].id,ca:T[0].color,cb:T[1].color,na:T[0].name,nb:T[1].name};
+  NET.send(Object.assign({k:"hit",d:[d0,d1]},fxb));
   [0,1].forEach(t=>setTimeout(()=>floatDmg(t,"+"+res[t].d,res[t].d>0),200));
   setTimeout(()=>hudDepth(m),300);
   setTimeout(()=>{
@@ -808,7 +823,7 @@ function confirmRoom(){
     let w=m.s[0]>m.s[1]?0:m.s[1]>m.s[0]?1:m.t[0]<m.t[1]?0:m.t[1]<m.t[0]?1:Math.random()<.5?0:1;const tie=m.s[0]===m.s[1];if(H.teams[m.a].bot!==H.teams[m.b].bot)w=H.teams[m.a].bot?1:0;
     m.w=w?m.b:m.a;m.done=true;H.burn.push(w?m.a:m.b);
     const F=FINS[(H.fins||0)%FINS.length],fin=F[0];H.fins=(H.fins||0)+1;
-    banner("FINAL BLOW",tie?"Tied on depth. Faster team advances.":"");
+    banner("FINAL BLOW",tie?"Tied on depth. Faster team advances.":"");NET.send(Object.assign({k:"fin",w,fin,blade:!!F[2],title:F[1]},fxb));
     setTimeout(()=>{pose(w,"atk",{blade:!!F[2]});setTimeout(()=>{if(!A)return;const f=A.f[1-w];f.act=fin;f.t0=performance.now();f.dead=true;A.shake=10;if(fin==="ko")sfx.ko();else if(F[2])sfx.slash();else sfx.boom()},260)},700);
     setTimeout(()=>{if(!H||H.rv!==rv)return;if(A&&!A.f[w].dead)A.f[w].act="win";banner(F[1],esc(T[w].name)+" wins");rv.step="done";saveH();pub();footNext(m,true)},4600);
   },wait+500);
@@ -826,6 +841,7 @@ function viewChamp(){
   document.getElementById("back").onclick=()=>{H.phase="bracket";render()};drawSprite(document.getElementById("ccv").getContext("2d"),0,0,1,false,t.color,false);sfx.go();
 }
 function viewPlayer(){
+  if(P.fx&&Date.now()<P.fxEnd&&document.getElementById("cv"))return;
   const s=P.st,me=s&&s.teams.find(x=>x.id===P.id);stage.textContent="Room "+P.code;let h;
   if(!s)h=`<h2>Connecting to room ${esc(P.code)}</h2><p class="note">Check the code if this takes more than a few seconds.</p>`;
   else if(!me)h=s.phase==="lobby"?`<h2>Joining</h2>`:`<h2>This game already started</h2><p class="note">Ask the host to start a new room.</p>`;
