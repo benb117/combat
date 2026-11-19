@@ -383,6 +383,13 @@ input{font-size:24px}
 .hcard .eyebrow i{width:20px;height:20px;flex:none;background:var(--hit);border:4px solid var(--gold);box-shadow:none;box-sizing:border-box}
 @media (max-width:560px){.hcard .eyebrow{font-size:13px;letter-spacing:.12em}.hcard{padding:22px 18px 18px}.homev{padding:12px 0 28px}}
 .pfx{gap:10px}.pfx .me{justify-content:center;gap:8px;flex-wrap:wrap}.pfx .arena{margin:0!important;width:100%;box-sizing:border-box}.pfx .banner .big{font-size:22px}.pfx .banner .sub{font-size:14px}
+.mcl{list-style:none;padding:0;margin:6px auto;display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:980px;width:100%}
+.mcl li{display:flex;gap:12px;align-items:center;background:#120808;border:3px solid var(--line);padding:12px 14px;font-size:clamp(16px,2vw,24px);text-align:left}
+.mcl b,.mco b{flex:none;width:34px;height:34px;display:grid;place-items:center;background:var(--gold);color:#120808}
+.mcb{display:flex;flex-direction:column;gap:10px;width:100%}
+.mco{display:flex;gap:12px;align-items:center;text-align:left;background:#120808;border:3px solid var(--line);color:var(--ink);padding:12px;font-size:17px;width:100%;box-sizing:border-box}
+.mco:active,.mco:focus-visible{border-color:var(--gold);outline:none}
+@media (max-width:700px){.mcl{grid-template-columns:1fr}}
 </style></head><body>
 <header class="top wrap"><div class="brand">NAI <span>MORTAL COMBAT</span></div><div class="stage" id="stage"></div>
 <button class="ghost" id="snd" type="button">Sound: on</button><button class="ghost" id="reset" type="button" hidden>Leave game</button></header>
@@ -564,6 +571,16 @@ const ss={get:k=>{try{return JSON.parse(sessionStorage.getItem(k))}catch(e){retu
 
 /* Prompts: each answer is [depth, display name, ...aliases]. Depth 1 = the obvious answer, 5 = the one few people remember. Depths are a judgment call; the host can adjust any score at reveal. */
 const PROMPTS=[
+{q:"Where did NAI originate?",core:2,mc:["USC (University of Southern California)", "UCLA", "Cal State LA", "LAUSD"]},
+{q:"When did the first NAI cohort graduate from high school?",core:2,mc:["1997", "1991", "2001", "1993"]},
+{q:"Why was NAI created?",core:2,mc:["To address the lack of diversity in higher education", "To recruit athletes for USC", "To train future USC staff", "To raise USC's national ranking"]},
+{q:"Who is NAI's Executive Director?",core:2,mc:["Dr. Lizette Zarate", "Ms. Pippin", "Ivonne", "Sylvia Manning"]},
+{q:"What is the main source of power at NAI?",core:2,mc:["Personal power", "Positional power", "Coercive power", "Reward power"]},
+{q:"Which type of positional power is almost nonexistent at NAI?",core:2,mc:["Coercive", "Legitimate", "Reward", "Referent"]},
+{q:"What does Dr. Zarate do to build commitment instead of compliance?",core:2,mc:["Calling in, not calling out", "Lays down the law", "Uses the scholarship as a threat", "Sends every conflict to HR"]},
+{q:"Which NAI program builds autonomy?",core:2,mc:["The Ambassadors Program", "The Saturday Academy Curriculum", "The Family Development Institute", "The USC scholarship"]},
+{q:"Which NAI program builds competence?",core:2,mc:["The Saturday Academy Curriculum", "The Ambassadors Program", "The Family Development Institute", "Junior Advisors"]},
+{q:"How does NAI cultivate relatedness?",core:2,mc:["Scholars spend grades 6 through 12 together with peers and staff", "By promising a USC scholarship", "By setting strict attendance requirements", "Through an annual staff survey"]},
 {q:"Theory Y: list what a Theory Y leader believes about people.",core:1,a:[[1,"Self-motivated","motivated","self motivated","driven"],[1,"Enjoy work","like work","likes work","enjoys work","want to work"],[1,"Responsible","responsibility","accountable"],[1,"Self-directed","self direction","self directed","autonomous","autonomy"],[1,"Trustworthy","trust","trusted"],[1,"Creative","creativity"],[1,"Capable","competent","capable of growth","growth"],[1,"Deserve empowerment","empower","empowered","empowerment"]]},
 {q:"Theory X: list what a Theory X leader believes about people.",core:1,a:[[1,"Lazy"],[1,"Dislike work","hate work","avoid work","dislikes work"],[1,"Need control","control","controlled","controlling"],[1,"Need threats","threats","punishment","punish","coerced","coercion","forced"],[1,"Avoid responsibility","irresponsible"],[1,"Need supervision","supervision","micromanage","micromanaged","watched","monitored"],[1,"Motivated by money","money","pay","security"]]},
 {q:"List as many of the five bases of power as you can.",core:1,a:[[1,"Legitimate","legitimate authority","formal authority","authority","position"],[1,"Reward","rewards"],[1,"Coercive","coercion","punishment","punish"],[1,"Expert","expertise","knowledge"],[1,"Referent","reference","referant","charisma"]]},
@@ -602,6 +619,7 @@ function judge1(pr,text){
   return best&&bs<9?best:null;
 }
 function judge(pr,text){
+  if(pr.mc){const ok=String(text)===pr.mc[0];return{d:ok?1:0,name:ok?"Correct":"Wrong. Answer: "+pr.mc[0]}}
   const raw=String(text||""),hit=[],add=e=>{if(e&&hit.indexOf(e)<0)hit.push(e)};
   raw.split(/[,;\n\/+]|\band\b|&/i).map(x=>x.trim()).filter(Boolean).forEach(x=>add(judge1(pr,x)));
   const whole=" "+norm(raw)+" ",plain=" "+raw.toLowerCase().replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim()+" ";
@@ -649,7 +667,7 @@ function pub(){
   if(!H||!NET)return;const act=H.phase==="lobby"?[]:activeTeams(),out=new Set();
   if(H.rounds)H.rounds.forEach(rd=>rd.forEach(m=>{if(m.done&&m.a!=null&&m.b!=null)out.add(m.w===m.a?m.b:m.a)}));
   const fin=H.rounds&&H.rounds[2][0];
-  NET.send({t:"state",phase:H.phase,round:H.round,pi:H.pi,n:NP(),prompt:H.phase==="ask"?H.cur.prompt.q:null,askId:H.cur?H.cur.askId:null,
+  NET.send({t:"state",phase:H.phase,round:H.round,pi:H.pi,n:NP(),prompt:H.phase==="ask"?H.cur.prompt.q:null,mc:H.phase==="ask"&&H.cur.opts?H.cur.opts:null,askId:H.cur?H.cur.askId:null,
     left:H.phase==="ask"?Math.max(0,H.cur.end-Date.now()):0,champ:fin&&fin.done&&fin.w!=null?H.teams[fin.w].id:null,
     teams:H.teams.map((tm,i)=>{let tot=0,last=null;liveMatches().forEach(x=>{const s=x.m.a===i?0:x.m.b===i?1:-1;if(s>-1){tot=x.m.s[s];last=x.m.last?x.m.last[s]:null}});
       return{id:tm.id,name:tm.name,color:tm.color,out:out.has(i),inm:act.indexOf(i)>-1,sub:!!(H.cur&&H.cur.ans[tm.id]),total:tot,last}})});
@@ -658,7 +676,7 @@ function buildBracket(){
   const order=[0,4,2,6,1,5,3,7],slots=Array(8).fill(null);H.teams=shuffle(H.teams);H.teams.forEach((t,i)=>{slots[order[i]]=i});
   const mk=(a,b)=>({a,b,w:null,done:false,s:[0,0],t:[0,0]});
   H.rounds=[[0,1,2,3].map(i=>mk(slots[2*i],slots[2*i+1])),[mk(null,null),mk(null,null)],[mk(null,null)]];
-  H.deck=(()=>{const ix=PROMPTS.map((_,i)=>i);return shuffle(ix.filter(i=>!PROMPTS[i].core)).concat(shuffle(ix.filter(i=>PROMPTS[i].core)))})();H.round=0;H.pi=0;settle();
+  H.deck=(()=>{const ix=PROMPTS.map((_,i)=>i),g=k=>shuffle(ix.filter(i=>(PROMPTS[i].core||0)===k));return g(0).concat(g(1),g(2))})();H.round=0;H.pi=0;settle();
 }
 function settle(){
   for(let r=0;r<3;r++)H.rounds[r].forEach((m,i)=>{
@@ -668,8 +686,8 @@ function settle(){
   for(let r=0;r<3;r++)if(H.rounds[r].some(m=>m.ready&&!m.done)){H.round=r;return}
 }
 function startPrompt(){
-  if(!H.deck.length)H.deck=(()=>{const ix=PROMPTS.map((_,i)=>i);return shuffle(ix.filter(i=>!PROMPTS[i].core)).concat(shuffle(ix.filter(i=>PROMPTS[i].core)))})();
-  H.cur={askId:rid(6),prompt:PROMPTS[H.deck.pop()],end:Date.now()+ATIME,ans:{}};H.phase="ask";saveH();pub();sfx.go();render();askTick(true);
+  if(!H.deck.length)H.deck=(()=>{const ix=PROMPTS.map((_,i)=>i),g=k=>shuffle(ix.filter(i=>(PROMPTS[i].core||0)===k));return g(0).concat(g(1),g(2))})();
+  H.cur={askId:rid(6),prompt:PROMPTS[H.deck.pop()],end:Date.now()+ATIME,ans:{}};if(H.cur.prompt.mc)H.cur.opts=shuffle(H.cur.prompt.mc.slice());H.phase="ask";saveH();pub();sfx.go();render();askTick(true);
 }
 function askTick(start){
   clearInterval(askTimer);if(!start)return;
@@ -689,7 +707,7 @@ function playerFx(m){
   if(fresh){app.innerHTML=`<section class="phone pfx"><div class="me"><span class="chip" style="background:${m.ca}"></span><b>${esc(m.na)}</b><span class="note">vs</span><b>${esc(m.nb)}</b><span class="chip" style="background:${m.cb}"></span></div>
     <div class="arena"><canvas id="cv" width="640" height="240" aria-hidden="true"></canvas><div class="banner" id="banner" aria-live="polite"></div></div></section>`;arenaStart(m.ca,m.cb)}
   if(m.k==="hit"){const d0=m.d[0],d1=m.d[1],hit=(t,dl)=>setTimeout(()=>{pose(t,"atk");setTimeout(()=>pose(1-t,"hurt"),240)},dl);
-    if(d0===0&&d1===0)banner("","Nobody scored");else{if(d0>d1)hit(0,0);else if(d1>d0)hit(1,0);else{hit(0,0);hit(1,650)}banner("+"+d0+" vs +"+d1,d0===d1?"Equal depth":esc(nm[d0>d1?0:1])+" went deeper")}}
+    if(d0===0&&d1===0)banner("","Nobody scored");else{if(d0>d1)hit(0,0);else if(d1>d0)hit(1,0);else if(m.fa!=null)hit(m.fa,0);else{hit(0,0);hit(1,650)}banner("+"+d0+" vs +"+d1,d0===d1?(m.fa!=null?"Both right. "+esc(nm[m.fa])+" was faster":"Equal depth"):esc(nm[d0>d1?0:1])+(m.fa!=null?" got it right":" went deeper"))}}
   else{banner("FINAL BLOW","");const w=m.w;
     setTimeout(()=>{pose(w,"atk",{blade:m.blade});setTimeout(()=>{if(!A)return;const f=A.f[1-w];f.act=m.fin;f.t0=performance.now();f.dead=true;A.shake=10},260)},700);
     setTimeout(()=>{if(A&&!A.f[w].dead)A.f[w].act="win";banner(m.title,esc(nm[w])+" wins")},4600)}
@@ -778,7 +796,7 @@ const FIGHT=["Round one. Fight!","Round two. Fight!","Final round. Fight!"];
 function viewAsk(){
   stage.textContent=ROUNDS[H.round]+" · Prompt "+(H.pi+1)+" of "+NP();
   app.innerHTML=`<section class="askv"><p class="call">${NP()===1?"Sudden death. Fight!":FIGHT[H.pi]||"Fight!"}</p><div class="qmeta">${ROUNDS[H.round]} · Prompt ${H.pi+1} of ${NP()} · Room ${H.code}</div>
-  <h1 class="prompt">${esc(H.cur.prompt.q)}</h1><p class="lede">List as many as you can to win. Name them all or be finished.</p>
+  <h1 class="prompt">${esc(H.cur.prompt.q)}</h1>${H.cur.opts?`<ol class="mcl">${H.cur.opts.map((o,i)=>`<li><b>${"ABCD"[i]}</b>${esc(o)}</li>`).join("")}</ol><p class="lede">Right answer wins. If both are right, the fastest finger survives.</p>`:`<p class="lede">List as many as you can to win. Name them all or be finished.</p>`}
   <div class="clock" id="clock">${Math.ceil(ATIME/1000)}</div><div class="teams" id="chips"></div>
   <div class="actions"><button class="ghost" id="skip" type="button">Reveal now</button></div></section>`;
   paintChips();document.getElementById("skip").onclick=endAsk;
@@ -788,7 +806,7 @@ function viewReveal(){
   if(!rv.res){rv.res=roomResults();saveH()}
   stage.textContent=ROUNDS[H.round]+" · Room "+(rv.k+1)+" of "+list.length;
   const card=t=>{const r=rv.res[t];return `<div class="acard ${t?"r":"l"}" style="--c:${T[t].color}"><div class="who">${esc(T[t].name)}</div>
-    <div class="typed">${r.text?esc(r.text):"No answer"}</div><div class="as">${r.name?esc(r.name):r.text?"Not on the list":""}</div>
+    <div class="typed">${r.text?esc(r.text):"No answer"}</div><div class="as">${r.name?esc(r.name):r.text?"Not on the list":""}${H.cur.prompt.mc&&r.text?" · "+(r.ms/1000).toFixed(1)+"s":""}</div>
     <div class="depth"><button class="ghost adj" data-t="${t}" data-d="-1" type="button" aria-label="Lower ${esc(T[t].name)} depth">-</button><b id="d${t}">${r.d}</b><button class="ghost adj" data-t="${t}" data-d="1" type="button" aria-label="Raise ${esc(T[t].name)} depth">+</button></div><div class="qmeta">depth</div></div>`};
   app.innerHTML=`<section class="fight"><div class="hud">
     <div class="hp l" style="--c:${T[0].color}"><div class="nm">${esc(T[0].name)}</div><div class="bar"><div class="fill" id="f0"></div></div><div class="hpn" id="n0"></div></div>
@@ -801,7 +819,7 @@ function viewReveal(){
   app.querySelectorAll(".adj").forEach(b=>b.onclick=()=>{if(H.rv.step!=="judge")return;const t=+b.dataset.t,r=H.rv.res[t];r.d=Math.max(0,Math.min(MAXD,r.d+(+b.dataset.d)));document.getElementById("d"+t).textContent=r.d;saveH()});
   if(rv.step==="judge")foot("SCORE IT",confirmRoom);else{app.querySelectorAll(".adj").forEach(b=>b.disabled=true);footNext(m,last)}
 }
-function hudDepth(m){[0,1].forEach(t=>{const f=document.getElementById("f"+t),n=document.getElementById("n"+t);if(!f)return;f.style.width=Math.min(100,m.s[t]/(NP()*MAXD)*100)+"%";n.textContent="Depth "+m.s[t]})}
+function hudDepth(m){[0,1].forEach(t=>{const f=document.getElementById("f"+t),n=document.getElementById("n"+t);if(!f)return;f.style.width=Math.min(100,m.s[t]/(NP()*(H.cur&&H.cur.prompt.mc?1:MAXD))*100)+"%";n.textContent="Depth "+m.s[t]})}
 function foot(label,fn){const f=document.querySelector(".foot");if(!f)return;f.innerHTML=`<button class="cta" id="adv" type="button">${label}</button><span class="note">or press Space</span>`;const b=document.getElementById("adv");b.onclick=fn;b.focus()}
 function banner(big,sub){const b=document.getElementById("banner");if(b)b.innerHTML=(big?`<div class="big">${big}</div>`:"")+(sub?`<div class="sub">${sub}</div>`:"")}
 function floatDmg(t,txt,good){const g=document.getElementById("g"+t);if(!g)return;const d=document.createElement("div");d.className="dmg"+(good?" good":"");d.textContent=txt;g.appendChild(d);setTimeout(()=>d.remove(),1400)}
@@ -815,10 +833,11 @@ function confirmRoom(){
   const d0=res[0].d,d1=res[1].d;let wait=500;
   if(d0===0&&d1===0){banner("","Nobody scored");sfx.miss()}
   else{const hit=(t,dl)=>setTimeout(()=>{pose(t,"atk");setTimeout(()=>{pose(1-t,"hurt");sfx.hit()},240)},dl);
-    if(d0>d1){hit(0,0);wait=900}else if(d1>d0){hit(1,0);wait=900}else{hit(0,0);hit(1,650);wait=1500}
-    banner("",d0===d1?"Equal depth":esc(T[d0>d1?0:1].name)+" went deeper")}
+    const mcq=!!H.cur.prompt.mc,fa=res[0].ms<=res[1].ms?0:1;
+    if(d0>d1){hit(0,0);wait=900}else if(d1>d0){hit(1,0);wait=900}else if(mcq){hit(fa,0);wait=900}else{hit(0,0);hit(1,650);wait=1500}
+    banner("",mcq?(d0===d1?"Both right. "+esc(T[fa].name)+" was faster":esc(T[d0>d1?0:1].name)+" got it right"):d0===d1?"Equal depth":esc(T[d0>d1?0:1].name)+" went deeper")}
   const fxb={t:"fx",a:T[0].id,b:T[1].id,ca:T[0].color,cb:T[1].color,na:T[0].name,nb:T[1].name};
-  NET.send(Object.assign({k:"hit",d:[d0,d1]},fxb));
+  NET.send(Object.assign({k:"hit",d:[d0,d1],fa:H.cur.prompt.mc&&d0===d1&&d0>0?(res[0].ms<=res[1].ms?0:1):null},fxb));
   [0,1].forEach(t=>setTimeout(()=>floatDmg(t,"+"+res[t].d,res[t].d>0),200));
   setTimeout(()=>hudDepth(m),300);
   setTimeout(()=>{
@@ -827,7 +846,7 @@ function confirmRoom(){
     let w=m.s[0]>m.s[1]?0:m.s[1]>m.s[0]?1:m.t[0]<m.t[1]?0:m.t[1]<m.t[0]?1:Math.random()<.5?0:1;const tie=m.s[0]===m.s[1];if(H.teams[m.a].bot!==H.teams[m.b].bot)w=H.teams[m.a].bot?1:0;
     m.w=w?m.b:m.a;m.done=true;H.burn.push(w?m.a:m.b);
     const F=FINS[(H.fins||0)%FINS.length],fin=F[0];H.fins=(H.fins||0)+1;
-    banner("FINAL BLOW",tie?"Tied on depth. Faster team advances.":"");NET.send(Object.assign({k:"fin",w,fin,blade:!!F[2],title:F[1]},fxb));
+    banner("FINAL BLOW",tie?"Tied. Faster team advances.":"");NET.send(Object.assign({k:"fin",w,fin,blade:!!F[2],title:F[1]},fxb));
     setTimeout(()=>{pose(w,"atk",{blade:!!F[2]});setTimeout(()=>{if(!A)return;const f=A.f[1-w];f.act=fin;f.t0=performance.now();f.dead=true;A.shake=10;if(fin==="ko")sfx.ko();else if(F[2])sfx.slash();else sfx.boom()},260)},700);
     setTimeout(()=>{if(!H||H.rv!==rv)return;if(A&&!A.f[w].dead)A.f[w].act="win";banner(F[1],esc(T[w].name)+" wins");rv.step="done";saveH();pub();footNext(m,true)},4600);
   },wait+500);
@@ -852,16 +871,16 @@ function viewPlayer(){
   else if(s.champ)h=s.champ===P.id?`<h2 class="gold">You are the champion</h2>`:`<h2>${esc((s.teams.find(x=>x.id===s.champ)||{}).name||"")} wins the tournament</h2>`;
   else if(me.out)h=`<h2>Knocked out</h2><p class="note">Your run is over. Watch the big screen.</p>`;
   else if(s.phase==="lobby")h=`<h2>You're in, scholars</h2><p class="note">Waiting for the host to start. ${s.teams.length} of 8 teams joined.</p>`;
-  else if(s.phase==="bracket")h=`<p class="call">Scholars, are you ready?</p><h2>${ROUNDS[s.round]} up next</h2><p class="note">${me.inm?"Get ready. The more you list, the deeper you go.":"You have a bye this round."}</p>`;
+  else if(s.phase==="bracket")h=`<p class="call">Scholars, are you ready?</p><h2>${ROUNDS[s.round]} up next</h2><p class="note">${me.inm?"Get ready. Be right, be fast, or be finished.":"You have a bye this round."}</p>`;
   else if(s.phase==="ask"){
     if(!me.inm)h=`<h2>Sit tight</h2><p class="note">You are not in this round.</p>`;
     else if(P.pend&&P.pend.askId===s.askId)h=`<h2>Locked in</h2><p class="typed">${esc(P.pend.text)}</p><p class="note">${P.pend.ok?"Eyes on the big screen.":"Sending..."}</p>`;
     else h=`<p class="call">${s.n===1?"Sudden death. Fight!":FIGHT[s.pi]||"Fight!"}</p><div class="qmeta">Prompt ${s.pi+1} of ${s.n}</div><h2>${esc(s.prompt)}</h2><div class="clock" id="pclock"></div>
-      <form id="af"><input id="ai" maxlength="160" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="e.g. first, second, third" aria-label="Your answer"><button class="cta" type="submit">LOCK IN</button></form>
-      <p class="note">List as many as you can to win. Name them all or be finished. Commas between answers, one submission.</p>`}
+      ${s.mc?`<div class="mcb">${s.mc.map((o,i)=>`<button type="button" class="mco" data-i="${i}"><b>${"ABCD"[i]}</b><span>${esc(o)}</span></button>`).join("")}</div><p class="note">Right answer wins. If both are right, the fastest finger survives. One tap, no changes.</p>`:`<form id="af"><input id="ai" maxlength="160" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="e.g. first, second, third" aria-label="Your answer"><button class="cta" type="submit">LOCK IN</button></form>
+      <p class="note">List as many as you can to win. Name them all or be finished. Commas between answers, one submission.</p>`}`}
   else h=`<h2>Reveal time</h2><p class="note">Watch the big screen.</p>${me.last?`<p class="typed">${me.last.text?esc(me.last.text):"No answer"}</p><p class="note">Depth ${me.last.d} this prompt. Total ${me.total}.</p>`:""}`;
   app.innerHTML=`<section class="phone" style="--c:${me?me.color:"var(--gold)"}"><div class="me"><span class="chip" style="background:${me?me.color:"var(--dim)"}"></span><b>${esc(P.name)}</b></div>${h}</section>`;
-  const af=document.getElementById("af");if(af){af.onsubmit=e=>{e.preventDefault();const v=document.getElementById("ai").value.trim();if(v)playerSubmit(v)};document.getElementById("ai").focus()}
+  app.querySelectorAll(".mco").forEach(b=>b.onclick=()=>playerSubmit(P.st.mc[+b.dataset.i]));const af=document.getElementById("af");if(af){af.onsubmit=e=>{e.preventDefault();const v=document.getElementById("ai").value.trim();if(v)playerSubmit(v)};document.getElementById("ai").focus()}
 }
 
 /* global controls */
