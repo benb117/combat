@@ -383,6 +383,7 @@ input{font-size:24px}
 .hcard .eyebrow i{width:20px;height:20px;flex:none;background:var(--hit);border:4px solid var(--gold);box-shadow:none;box-sizing:border-box}
 @media (max-width:560px){.hcard .eyebrow{font-size:13px;letter-spacing:.12em}.hcard{padding:22px 18px 18px}.homev{padding:12px 0 28px}}
 .pfx{gap:10px}.pfx .me{justify-content:center;gap:8px;flex-wrap:wrap}.pfx .arena{margin:0!important;width:100%;box-sizing:border-box}.pfx .banner .big{font-size:22px}.pfx .banner .sub{font-size:14px}
+.mcl li:last-child:nth-child(odd){grid-column:1/-1}
 .mcl{list-style:none;padding:0;margin:6px auto;display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:980px;width:100%}
 .mcl li{display:flex;gap:12px;align-items:center;background:#120808;border:3px solid var(--line);padding:12px 14px;font-size:clamp(16px,2vw,24px);text-align:left}
 .mcl b,.mco b{flex:none;width:34px;height:34px;display:grid;place-items:center;background:var(--gold);color:#120808}
@@ -571,9 +572,9 @@ const ss={get:k=>{try{return JSON.parse(sessionStorage.getItem(k))}catch(e){retu
 
 /* Prompts: each answer is [depth, display name, ...aliases]. Depth 1 = the obvious answer, 5 = the one few people remember. Depths are a judgment call; the host can adjust any score at reveal. */
 const PROMPTS=[
-{q:"Where did NAI originate?",core:2,mc:["USC (University of Southern California)", "UCLA", "Cal State LA", "LAUSD"]},
+{q:"What neighborhood was NAI initially created to serve?",core:2,mc:["South LA", "Historic South Central", "Downtown LA", "El Sereno", "Lincoln Heights"]},
 {q:"When did the first NAI cohort graduate from high school?",core:2,mc:["1997", "1991", "2001", "1993"]},
-{q:"Why was NAI created?",core:2,mc:["To address the lack of diversity in higher education", "To recruit athletes for USC", "To train future USC staff", "To raise USC's national ranking"]},
+{q:"Based on the slides, what was the main reason NAI was created?",core:2,mc:["To address the lack of diversity in higher education", "To address a lack of academic strength", "To address a lack of initiative", "To address a lack of funding for staff"]},
 {q:"Who is NAI's Executive Director?",core:2,mc:["Dr. Lizette Zarate", "Ms. Pippin", "Ivonne", "Sylvia Manning"]},
 {q:"What is the main source of power at NAI?",core:2,mc:["Personal power", "Positional power", "Coercive power", "Reward power"]},
 {q:"Which type of positional power is almost nonexistent at NAI?",core:2,mc:["Coercive", "Legitimate", "Reward", "Referent"]},
@@ -796,7 +797,7 @@ const FIGHT=["Round one. Fight!","Round two. Fight!","Final round. Fight!"];
 function viewAsk(){
   stage.textContent=ROUNDS[H.round]+" · Prompt "+(H.pi+1)+" of "+NP();
   app.innerHTML=`<section class="askv"><p class="call">${NP()===1?"Sudden death. Fight!":FIGHT[H.pi]||"Fight!"}</p><div class="qmeta">${ROUNDS[H.round]} · Prompt ${H.pi+1} of ${NP()} · Room ${H.code}</div>
-  <h1 class="prompt">${esc(H.cur.prompt.q)}</h1>${H.cur.opts?`<ol class="mcl">${H.cur.opts.map((o,i)=>`<li><b>${"ABCD"[i]}</b>${esc(o)}</li>`).join("")}</ol><p class="lede">Right answer wins. If both are right, the fastest finger survives.</p>`:`<p class="lede">List as many as you can to win. Name them all or be finished.</p>`}
+  <h1 class="prompt">${esc(H.cur.prompt.q)}</h1>${H.cur.opts?`<ol class="mcl">${H.cur.opts.map((o,i)=>`<li><b>${"ABCDE"[i]}</b>${esc(o)}</li>`).join("")}</ol><p class="lede">Right answer wins. If both are right, the fastest finger survives.</p>`:`<p class="lede">List as many as you can to win. Name them all or be finished.</p>`}
   <div class="clock" id="clock">${Math.ceil(ATIME/1000)}</div><div class="teams" id="chips"></div>
   <div class="actions"><button class="ghost" id="skip" type="button">Reveal now</button></div></section>`;
   paintChips();document.getElementById("skip").onclick=endAsk;
@@ -876,7 +877,7 @@ function viewPlayer(){
     if(!me.inm)h=`<h2>Sit tight</h2><p class="note">You are not in this round.</p>`;
     else if(P.pend&&P.pend.askId===s.askId)h=`<h2>Locked in</h2><p class="typed">${esc(P.pend.text)}</p><p class="note">${P.pend.ok?"Eyes on the big screen.":"Sending..."}</p>`;
     else h=`<p class="call">${s.n===1?"Sudden death. Fight!":FIGHT[s.pi]||"Fight!"}</p><div class="qmeta">Prompt ${s.pi+1} of ${s.n}</div><h2>${esc(s.prompt)}</h2><div class="clock" id="pclock"></div>
-      ${s.mc?`<div class="mcb">${s.mc.map((o,i)=>`<button type="button" class="mco" data-i="${i}"><b>${"ABCD"[i]}</b><span>${esc(o)}</span></button>`).join("")}</div><p class="note">Right answer wins. If both are right, the fastest finger survives. One tap, no changes.</p>`:`<form id="af"><input id="ai" maxlength="160" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="e.g. first, second, third" aria-label="Your answer"><button class="cta" type="submit">LOCK IN</button></form>
+      ${s.mc?`<div class="mcb">${s.mc.map((o,i)=>`<button type="button" class="mco" data-i="${i}"><b>${"ABCDE"[i]}</b><span>${esc(o)}</span></button>`).join("")}</div><p class="note">Right answer wins. If both are right, the fastest finger survives. One tap, no changes.</p>`:`<form id="af"><input id="ai" maxlength="160" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="e.g. first, second, third" aria-label="Your answer"><button class="cta" type="submit">LOCK IN</button></form>
       <p class="note">List as many as you can to win. Name them all or be finished. Commas between answers, one submission.</p>`}`}
   else h=`<h2>Reveal time</h2><p class="note">Watch the big screen.</p>${me.last?`<p class="typed">${me.last.text?esc(me.last.text):"No answer"}</p><p class="note">Depth ${me.last.d} this prompt. Total ${me.total}.</p>`:""}`;
   app.innerHTML=`<section class="phone" style="--c:${me?me.color:"var(--gold)"}"><div class="me"><span class="chip" style="background:${me?me.color:"var(--dim)"}"></span><b>${esc(P.name)}</b></div>${h}</section>`;
